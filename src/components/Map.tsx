@@ -313,6 +313,8 @@ export default function StationMap({
       gestureHandling="greedy"
       mapId="ac323095a9ef6b841ee36dfb"
       className="h-full w-full"
+      mapTypeControlOptions={{ position: ControlPosition.BOTTOM_RIGHT }}
+      fullscreenControl={false}
       onClick={() => {
         setSelectedStation(null);
         setSelectedMarker(null);
