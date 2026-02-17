@@ -36,7 +36,7 @@ function AboutModal({ onClose }: { onClose: () => void }) {
           <h2 className="text-xl font-bold text-ocean-900">About SoundWaters</h2>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-ocean-100 text-ocean-600 transition-all hover:bg-ocean-200 hover:scale-110"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-ocean-100 text-ocean-600 transition-all hover:bg-ocean-200 hover:scale-110"
             aria-label="Close"
           >
             ✕
@@ -237,21 +237,21 @@ export default function Home() {
           <div className="ml-2 h-6 w-px bg-ocean-200" />
           <button
             onClick={() => setShowRankings(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
             aria-label="Station rankings"
           >
             🏆
           </button>
           <button
             onClick={() => setShowGlossary(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
             aria-label="Glossary"
           >
             📖
           </button>
           <button
             onClick={() => setShowAbout(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
             aria-label="About this app"
           >
             ℹ️
@@ -345,39 +345,59 @@ export default function Home() {
       {/* Sliding Data Panel (right side) */}
       <AnimatePresence>
         {selectedStation && (
-          <motion.div
-            key="data-panel"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute right-0 top-0 z-20 h-full w-full sm:w-[450px]"
-          >
-            <StationDataPanel
-              station={selectedStation}
-              onClose={handleDeselect}
-              onCompare={handleCompare}
-              onShare={() => {
-                navigator.clipboard.writeText(window.location.href);
-              }}
+          <>
+            {/* Backdrop — mobile only */}
+            <motion.div
+              className="absolute inset-0 bg-black/20 sm:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleDeselect}
             />
-          </motion.div>
+            <motion.div
+              key="data-panel"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="absolute right-0 top-0 z-20 h-full w-full sm:w-[450px]"
+            >
+              <StationDataPanel
+                station={selectedStation}
+                onClose={handleDeselect}
+                onCompare={handleCompare}
+                onShare={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                }}
+              />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
       {/* Comparison Panel */}
       <AnimatePresence>
         {stationA && stationB && (
-          <motion.div
-            key="comparison-panel"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute right-0 top-0 z-20 h-full w-full sm:w-[520px]"
-          >
-            <ComparisonPanel stationA={stationA} stationB={stationB} onClose={handleExitComparison} />
-          </motion.div>
+          <>
+            {/* Backdrop — mobile only */}
+            <motion.div
+              className="absolute inset-0 bg-black/20 sm:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleExitComparison}
+            />
+            <motion.div
+              key="comparison-panel"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="absolute right-0 top-0 z-20 h-full w-full sm:w-[520px]"
+            >
+              <ComparisonPanel stationA={stationA} stationB={stationB} onClose={handleExitComparison} />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
