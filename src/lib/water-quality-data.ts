@@ -22,9 +22,11 @@ const CHARACTERISTIC_MAP: [RegExp, MetricKey][] = [
   [/^nitrate/i, "nitrogen"],
   [/^nitrogen/i, "nitrogen"],
   [/^inorganic nitrogen/i, "nitrogen"],
-  [/^enterococci/i, "bacteria"],
+  [/^enterococc/i, "bacteria"],
   [/^escherichia coli/i, "bacteria"],
   [/^e\.\s*coli/i, "bacteria"],
+  [/^fecal coliform/i, "bacteria"],
+  [/^coliform/i, "bacteria"],
 ];
 
 function matchMetric(characteristicName: string): MetricKey | null {
