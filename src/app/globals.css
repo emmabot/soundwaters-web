@@ -3,6 +3,7 @@
 :root {
   --background: #f0f9ff;
   --foreground: #0c4a6e;
+  --nav-mobile-offset: 120px;
 }
 
 @theme inline {
