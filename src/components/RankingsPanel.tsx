@@ -194,7 +194,7 @@ export default function RankingsPanel({ isOpen, onClose, onSelectStation, allSta
             </div>
             <div className="glass-panel flex h-full flex-col">
               {/* Header */}
-            <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4">
+            <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
               <div>
                 <h2 className="text-lg font-bold text-white">🏆 Station Rankings</h2>
                 <p className="text-xs text-ocean-200">{rankings ? `${rankings.length} stations with data` : "Loading..."}</p>

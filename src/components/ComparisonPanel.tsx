@@ -195,7 +195,7 @@ export default function ComparisonPanel({
         <div className="h-1 w-10 rounded-full bg-ocean-300" />
       </div>
       {/* Header */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4">
+      <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-bold text-white">📊 Station Comparison</h3>
           <p className="mt-0.5 truncate text-xs text-ocean-200">
