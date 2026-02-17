@@ -107,13 +107,16 @@ export default function StationDataPanel({
   station,
   onClose,
   onCompare,
+  onShare,
 }: {
   station: Station;
   onClose: () => void;
   onCompare?: () => void;
+  onShare?: () => void;
 }) {
   const [state, setState] = useState<FetchState>({ status: "loading" });
   const [activeMetric, setActiveMetric] = useState<MetricKey | null>(null);
+  const [showCopied, setShowCopied] = useState(false);
   const cacheRef = useRef<Map<string, WaterQualityResult[]>>(new Map());
 
   const loadData = useCallback(async (stationId: string) => {
@@ -178,14 +181,42 @@ export default function StationDataPanel({
             📊 Compare
           </button>
         )}
+        {onShare && (
+          <button
+            onClick={() => {
+              onShare();
+              setShowCopied(true);
+              setTimeout(() => setShowCopied(false), 2000);
+            }}
+            className="ml-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+            aria-label="Share station link"
+          >
+            🔗
+          </button>
+        )}
         <button
           onClick={onClose}
-          className="ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+          className="ml-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
           aria-label="Close panel"
         >
           ✕
         </button>
       </div>
+
+      {/* "Copied!" toast */}
+      <AnimatePresence>
+        {showCopied && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-1/2 top-16 z-50 -translate-x-1/2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-lg"
+          >
+            ✅ Copied!
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Body — scrollable */}
       <div className="flex-1 overflow-y-auto">

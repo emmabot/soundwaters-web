@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { getGrade, METRIC_INFO, type MetricKey } from "@/lib/thresholds";
 import type { MetricData } from "@/lib/water-quality-data";
+import GlossaryTooltip from "./GlossaryTooltip";
 
 export default function WaterQualityGradeCards({
   metrics,
@@ -59,7 +60,7 @@ export default function WaterQualityGradeCards({
               </motion.span>
               <span className="text-xs text-ocean-600">
                 {m.latestValue}
-                {info.unit ? ` ${info.unit}` : ""}
+                {info.unit ? <>{" "}<GlossaryTooltip term={info.unit}>{info.unit}</GlossaryTooltip></> : ""}
               </span>
             </div>
             <div className="mt-1 flex items-center gap-1">

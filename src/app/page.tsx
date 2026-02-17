@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { AnimatePresence, motion } from "framer-motion";
 import StationMap from "@/components/Map";
@@ -9,6 +9,7 @@ import FilterPanel, { type Filters } from "@/components/FilterPanel";
 import WelcomeHero from "@/components/WelcomeHero";
 import ComparisonPanel from "@/components/ComparisonPanel";
 import RankingsPanel from "@/components/RankingsPanel";
+import GlossaryPanel from "@/components/GlossaryButton";
 import type { Station } from "@/lib/stations";
 import { fetchStations, getStationsWithCoordinates } from "@/lib/stations";
 
@@ -121,6 +122,9 @@ export default function Home() {
   /* Rankings panel */
   const [showRankings, setShowRankings] = useState(false);
 
+  /* Glossary panel */
+  const [showGlossary, setShowGlossary] = useState(false);
+
   /* Welcome hero */
   const [showWelcome, setShowWelcome] = useState(true);
 
@@ -129,13 +133,39 @@ export default function Home() {
   const [stationA, setStationA] = useState<Station | null>(null);
   const [stationB, setStationB] = useState<Station | null>(null);
 
+  /* Track pending station ID from URL (resolved after stations load) */
+  const pendingStationIdRef = useRef<string | null>(null);
+
+  /* Read ?station= param on mount */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const stationId = params.get("station");
+    if (stationId) {
+      pendingStationIdRef.current = stationId;
+    }
+  }, []);
+
   /* Load stations on mount */
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const all = await fetchStations();
-        if (!cancelled) setAllStations(getStationsWithCoordinates(all));
+        if (!cancelled) {
+          const withCoords = getStationsWithCoordinates(all);
+          setAllStations(withCoords);
+
+          // Auto-select station from URL param
+          if (pendingStationIdRef.current) {
+            const match = withCoords.find((s) => s.id === pendingStationIdRef.current);
+            if (match) {
+              setSelectedStation(match);
+              setShowWelcome(false);
+            }
+            pendingStationIdRef.current = null;
+          }
+        }
       } catch {
         // Stations will remain empty — map shows no markers
       } finally {
@@ -158,11 +188,19 @@ export default function Home() {
       setComparisonMode(false);
     } else {
       setSelectedStation(station);
+      // Update URL with station ID
+      const url = new URL(window.location.href);
+      url.searchParams.set("station", station.id);
+      window.history.replaceState({}, "", url.toString());
     }
   }, [comparisonMode, stationA]);
 
   const handleDeselect = useCallback(() => {
     setSelectedStation(null);
+    // Remove station param from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete("station");
+    window.history.replaceState({}, "", url.toString());
   }, []);
 
   const handleCompare = useCallback(() => {
@@ -203,6 +241,13 @@ export default function Home() {
             aria-label="Station rankings"
           >
             🏆
+          </button>
+          <button
+            onClick={() => setShowGlossary(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            aria-label="Glossary"
+          >
+            📖
           </button>
           <button
             onClick={() => setShowAbout(true)}
@@ -312,6 +357,9 @@ export default function Home() {
               station={selectedStation}
               onClose={handleDeselect}
               onCompare={handleCompare}
+              onShare={() => {
+                navigator.clipboard.writeText(window.location.href);
+              }}
             />
           </motion.div>
         )}
@@ -332,6 +380,9 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Glossary Panel (left side) */}
+      <GlossaryPanel isOpen={showGlossary} onClose={() => setShowGlossary(false)} />
 
       {/* About Modal */}
       <AnimatePresence>
