@@ -8,6 +8,7 @@ import StationDataPanel from "@/components/StationDataPanel";
 import FilterPanel, { type Filters } from "@/components/FilterPanel";
 import WelcomeHero from "@/components/WelcomeHero";
 import ComparisonPanel from "@/components/ComparisonPanel";
+import RankingsPanel from "@/components/RankingsPanel";
 import type { Station } from "@/lib/stations";
 import { fetchStations, getStationsWithCoordinates } from "@/lib/stations";
 
@@ -117,6 +118,9 @@ export default function Home() {
   /* About modal */
   const [showAbout, setShowAbout] = useState(false);
 
+  /* Rankings panel */
+  const [showRankings, setShowRankings] = useState(false);
+
   /* Welcome hero */
   const [showWelcome, setShowWelcome] = useState(true);
 
@@ -194,6 +198,13 @@ export default function Home() {
           </div>
           <div className="ml-2 h-6 w-px bg-ocean-200" />
           <button
+            onClick={() => setShowRankings(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            aria-label="Station rankings"
+          >
+            🏆
+          </button>
+          <button
             onClick={() => setShowAbout(true)}
             className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
             aria-label="About this app"
@@ -240,6 +251,20 @@ export default function Home() {
         onFiltersChange={setFilters}
         isOpen={isFilterOpen}
         onToggle={() => setIsFilterOpen((o) => !o)}
+      />
+
+      {/* Rankings Panel (left side) */}
+      <RankingsPanel
+        isOpen={showRankings}
+        onClose={() => setShowRankings(false)}
+        onSelectStation={(id) => {
+          const station = allStations.find((s) => s.id === id);
+          if (station) {
+            setSelectedStation(station);
+            setShowRankings(false);
+          }
+        }}
+        allStations={allStations}
       />
 
       {/* Welcome — shown when no station selected and welcome not dismissed */}

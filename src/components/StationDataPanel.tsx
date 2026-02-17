@@ -7,6 +7,7 @@ import type { WaterQualityResult } from "@/lib/wqx-api";
 import { fetchWaterQualityResults } from "@/lib/wqx-api";
 import { processWaterQualityData, type MetricData } from "@/lib/water-quality-data";
 import type { MetricKey } from "@/lib/thresholds";
+import { computeConsistency } from "@/lib/rankings";
 import WaterQualityGradeCards from "./WaterQualityGradeCard";
 import MetricTabs from "./MetricTabs";
 import TrendChart from "./TrendChart";
@@ -44,6 +45,32 @@ function LoadingSkeleton() {
         <div key={i} className="shimmer h-20 rounded-xl" />
       ))}
       <div className="shimmer h-48 rounded-xl" />
+    </div>
+  );
+}
+
+function ConsistencyBadge({ metrics }: { metrics: MetricData[] }) {
+  let totalReadings = 0;
+  let lastDate: Date | null = null;
+  for (const m of metrics) {
+    totalReadings += m.points.length;
+    const d = new Date(m.latestDate);
+    if (!lastDate || d > lastDate) lastDate = d;
+  }
+  const { level, detail } = computeConsistency(metrics.length, totalReadings, lastDate);
+  const badge = level === "excellent"
+    ? { emoji: "⭐", label: "Excellent monitoring", bg: "bg-green-50", text: "text-green-700", border: "border-green-200" }
+    : level === "good"
+    ? { emoji: "✅", label: "Good coverage", bg: "bg-ocean-50", text: "text-ocean-700", border: "border-ocean-200" }
+    : { emoji: "⚠️", label: "Limited data", bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" };
+
+  return (
+    <div className={`flex items-start gap-2 rounded-xl border ${badge.border} ${badge.bg} px-3 py-2`}>
+      <span className="text-base">{badge.emoji}</span>
+      <div className="min-w-0">
+        <p className={`text-xs font-semibold ${badge.text}`}>{badge.label}</p>
+        <p className="text-xs text-ocean-500 mt-0.5">{detail}</p>
+      </div>
     </div>
   );
 }
@@ -196,6 +223,7 @@ export default function StationDataPanel({
               transition={{ duration: 0.3 }}
               className="space-y-4 p-4"
             >
+              <ConsistencyBadge metrics={state.metrics} />
               <DataSummaryBar metrics={state.metrics} />
               <TrendInsights metrics={state.metrics} />
               <WaterQualityGradeCards
