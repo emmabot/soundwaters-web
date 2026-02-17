@@ -10,6 +10,7 @@ import WelcomeHero from "@/components/WelcomeHero";
 import ComparisonPanel from "@/components/ComparisonPanel";
 import RankingsPanel from "@/components/RankingsPanel";
 import GlossaryPanel from "@/components/GlossaryButton";
+import SearchHint from "@/components/SearchHint";
 import type { Station } from "@/lib/stations";
 import { fetchStations, getStationsWithCoordinates } from "@/lib/stations";
 
@@ -127,6 +128,7 @@ export default function Home() {
 
   /* Welcome hero */
   const [showWelcome, setShowWelcome] = useState(true);
+  const [forceShowWelcome, setForceShowWelcome] = useState(false);
 
   /* Comparison mode */
   const [comparisonMode, setComparisonMode] = useState(false);
@@ -237,24 +239,38 @@ export default function Home() {
           <div className="ml-2 h-6 w-px bg-ocean-200" />
           <button
             onClick={() => setShowRankings(true)}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
             aria-label="Station rankings"
           >
-            🏆
+            <span className="text-lg leading-none">🏆</span>
+            <span className="mt-0.5 text-[10px] font-medium leading-tight">Rankings</span>
           </button>
           <button
             onClick={() => setShowGlossary(true)}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
             aria-label="Glossary"
           >
-            📖
+            <span className="text-lg leading-none">📖</span>
+            <span className="mt-0.5 text-[10px] font-medium leading-tight">Glossary</span>
           </button>
           <button
             onClick={() => setShowAbout(true)}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
             aria-label="About this app"
           >
-            ℹ️
+            <span className="text-lg leading-none">ℹ️</span>
+            <span className="mt-0.5 text-[10px] font-medium leading-tight">About</span>
+          </button>
+          <button
+            onClick={() => {
+              setForceShowWelcome(true);
+              setShowWelcome(true);
+            }}
+            className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 text-ocean-500 transition-all hover:bg-ocean-100 hover:text-ocean-700 hover:scale-110"
+            aria-label="Show help"
+          >
+            <span className="text-lg leading-none">❓</span>
+            <span className="mt-0.5 text-[10px] font-medium leading-tight">Help</span>
           </button>
         </nav>
       </div>
@@ -315,8 +331,16 @@ export default function Home() {
       {/* Welcome — shown when no station selected and welcome not dismissed */}
       <AnimatePresence>
         {!selectedStation && !stationA && showWelcome && (
-          <WelcomeHero stationCount={allStations.length} onDismiss={() => setShowWelcome(false)} />
+          <WelcomeHero stationCount={allStations.length} onDismiss={() => { setShowWelcome(false); setForceShowWelcome(false); }} forceShow={forceShowWelcome} />
         )}
+      </AnimatePresence>
+
+      {/* Search hint — floating chip to open filter panel */}
+      <AnimatePresence>
+        <SearchHint
+          visible={!showWelcome && !selectedStation && !stationA && !isFilterOpen}
+          onClick={() => setIsFilterOpen(true)}
+        />
       </AnimatePresence>
 
       {/* Comparison mode banner */}
