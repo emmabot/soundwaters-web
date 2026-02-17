@@ -384,7 +384,7 @@ export default function Home() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="absolute right-0 top-0 z-20 h-full w-full sm:w-[450px]"
+              className="absolute right-0 top-[88px] z-20 h-[calc(100%-88px)] w-full sm:top-0 sm:h-full sm:w-[450px]"
             >
               <StationDataPanel
                 station={selectedStation}
@@ -417,7 +417,7 @@ export default function Home() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="absolute right-0 top-0 z-20 h-full w-full sm:w-[520px]"
+              className="absolute right-0 top-[88px] z-20 h-[calc(100%-88px)] w-full sm:top-0 sm:h-full sm:w-[520px]"
             >
               <ComparisonPanel stationA={stationA} stationB={stationB} onClose={handleExitComparison} />
             </motion.div>
