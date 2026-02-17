@@ -25,9 +25,9 @@ function HeroOverlay({ stationCount }: { stationCount: number }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-center p-6 pb-12 sm:p-10 sm:pb-16"
+      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-center pt-20 px-6 sm:pt-24 sm:px-10"
     >
-      <div className="pointer-events-auto glass-dark w-full max-w-xl rounded-2xl px-6 py-8 text-center sm:px-10 sm:py-10">
+      <div className="pointer-events-auto glass-dark w-full max-w-lg rounded-2xl px-5 py-6 text-center sm:px-8 sm:py-8">
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
