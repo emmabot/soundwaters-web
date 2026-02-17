@@ -1,0 +1,54 @@
+"use client";
+
+import { APIProvider, Map } from "@vis.gl/react-google-maps";
+
+const LONG_ISLAND_SOUND_CENTER = { lat: 41.1, lng: -72.8 };
+const DEFAULT_ZOOM = 9;
+
+export default function Home() {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Intro section */}
+      <section className="rounded-xl bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-bold text-ocean-800">
+          Welcome, Explorer! 🔬
+        </h2>
+        <p className="mt-2 text-ocean-700">
+          Dive into real water quality data from{" "}
+          <strong>Long Island Sound</strong>. Click on a monitoring station to
+          see what scientists are measuring — from dissolved oxygen to
+          temperature and beyond.
+        </p>
+      </section>
+
+      {/* Map area */}
+      <section className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="h-[500px] w-full">
+          {apiKey ? (
+            <APIProvider apiKey={apiKey}>
+              <Map
+                defaultCenter={LONG_ISLAND_SOUND_CENTER}
+                defaultZoom={DEFAULT_ZOOM}
+                gestureHandling="greedy"
+                mapId="soundwaters-map"
+                className="h-full w-full"
+              />
+            </APIProvider>
+          ) : (
+            <div className="flex h-full items-center justify-center bg-ocean-100 text-ocean-600">
+              <div className="text-center">
+                <p className="text-lg font-semibold">🗺️ Map Loading Area</p>
+                <p className="mt-1 text-sm">
+                  Set <code className="rounded bg-ocean-200 px-1">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> in{" "}
+                  <code className="rounded bg-ocean-200 px-1">.env.local</code> to enable the map.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
