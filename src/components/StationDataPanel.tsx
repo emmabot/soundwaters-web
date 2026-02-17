@@ -237,7 +237,7 @@ export default function StationDataPanel({
                 onSelect={setActiveMetric}
                 metricsData={state.metrics}
               />
-              <TrendChart metricKey={activeData.key} points={activeData.points} />
+              <TrendChart metricKey={activeData.key} points={activeData.points} lat={station.lat} lng={station.lng} />
               <MetricExplanation metricKey={activeMetric} />
             </motion.div>
           )}

@@ -68,7 +68,7 @@ export function computeImprovementScore(metrics: MetricData[]): number {
 /* ── 2-year recency filter ── */
 
 function isRecent(lastSampleDate: Date | null): boolean {
-  if (\!lastSampleDate) return false;
+  if (!lastSampleDate) return false;
   const twoYearsAgo = new Date();
   twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
   return lastSampleDate >= twoYearsAgo;
@@ -82,7 +82,7 @@ export function rankStations(
 ): StationRanking[] {
   // For "needs-data", show stale/sparse stations; for all other tabs, only recent (2-year) stations
   if (category === "needs-data") {
-    const stale = stations.filter((s) => \!isRecent(s.lastSampleDate) || s.metricsAvailable <= 2 || s.totalReadings < 10);
+    const stale = stations.filter((s) => !isRecent(s.lastSampleDate) || s.metricsAvailable <= 2 || s.totalReadings < 10);
     return stale.sort((a, b) => a.totalReadings - b.totalReadings);
   }
 
