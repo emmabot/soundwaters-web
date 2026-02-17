@@ -26,26 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-ocean-50`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
-        <header className="bg-gradient-to-r from-ocean-700 via-ocean-600 to-teal-600 text-white shadow-lg">
-          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="wave">
-                🌊
-              </span>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-                  SoundWaters
-                </h1>
-                <p className="text-sm text-ocean-200">
-                  Explore Water Quality in Long Island Sound
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <main className="relative min-h-screen">
           {children}
         </main>
       </body>

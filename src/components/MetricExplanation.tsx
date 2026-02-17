@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { MetricKey } from "@/lib/thresholds";
 
 type ExplanationContent = {
@@ -36,27 +37,42 @@ export default function MetricExplanation({ metricKey }: { metricKey: MetricKey 
   const content = EXPLANATIONS[metricKey];
 
   return (
-    <div className="mt-3 rounded-lg border border-ocean-200 bg-ocean-50">
+    <div className="glass mt-3 overflow-hidden rounded-xl">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-ocean-700 hover:bg-ocean-100 transition-colors rounded-lg"
+        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-ocean-700 hover:bg-white/40 transition-colors rounded-xl"
       >
         <span>📚 What does this mean?</span>
-        <span className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="inline-block"
+        >
           ▼
-        </span>
+        </motion.span>
       </button>
-      {isOpen && (
-        <div className="space-y-3 px-4 pb-4 text-sm text-ocean-800">
-          <p>{content.what}</p>
-          <div>
-            <p className="font-semibold text-ocean-700">
-              🌊 Why does it matter for Long Island Sound?
-            </p>
-            <p className="mt-1">{content.why}</p>
-          </div>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 px-4 pb-4 text-sm text-ocean-800">
+              <p>{content.what}</p>
+              <div>
+                <p className="font-semibold text-ocean-700">
+                  🌊 Why does it matter for Long Island Sound?
+                </p>
+                <p className="mt-1">{content.why}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

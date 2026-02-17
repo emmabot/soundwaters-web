@@ -2,14 +2,16 @@
 
 import {
   ResponsiveContainer,
-  LineChart,
+  ComposedChart,
   Line,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ReferenceArea,
 } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import { RANGE_BANDS, METRIC_INFO, type MetricKey } from "@/lib/thresholds";
 import type { DataPoint } from "@/lib/water-quality-data";
 
@@ -32,7 +34,7 @@ function CustomTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-ocean-200 bg-white px-3 py-2 shadow-lg">
+    <div className="glass rounded-lg px-3 py-2 shadow-lg">
       <p className="text-xs font-semibold text-ocean-800">
         {label ? new Date(label).toLocaleDateString("en-US", {
           month: "long",
@@ -69,54 +71,75 @@ export default function TrendChart({
   const isSinglePoint = points.length === 1;
 
   return (
-    <div className="h-64 w-full sm:h-72 md:h-80">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={points}
-          margin={{ top: 10, right: 20, left: 10, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0f2fe" />
-          {bands.map((band, i) => (
-            <ReferenceArea
-              key={i}
-              y1={band.y1}
-              y2={band.y2}
-              fill={band.color}
-              fillOpacity={1}
-              ifOverflow="hidden"
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={metricKey}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.3 }}
+        className="glass h-64 w-full rounded-xl p-3 sm:h-72 md:h-80"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={points}
+            margin={{ top: 10, right: 20, left: 10, bottom: 5 }}
+          >
+            <defs>
+              <linearGradient id={`gradient-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#0284c7" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#0284c7" stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0f2fe" />
+            {bands.map((band, i) => (
+              <ReferenceArea
+                key={i}
+                y1={band.y1}
+                y2={band.y2}
+                fill={band.color}
+                fillOpacity={1}
+                ifOverflow="hidden"
+              />
+            ))}
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatDate}
+              tick={{ fontSize: 11, fill: "#64748b" }}
+              tickLine={false}
+              axisLine={{ stroke: "#cbd5e1" }}
             />
-          ))}
-          <XAxis
-            dataKey="date"
-            tickFormatter={formatDate}
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            tickLine={false}
-            axisLine={{ stroke: "#cbd5e1" }}
-          />
-          <YAxis
-            domain={[yMin - padding, yMax + padding]}
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            tickLine={false}
-            axisLine={{ stroke: "#cbd5e1" }}
-            label={{
-              value: info.unit,
-              angle: -90,
-              position: "insideLeft",
-              style: { fontSize: 11, fill: "#94a3b8" },
-            }}
-          />
-          <Tooltip content={<CustomTooltip unit={info.unit} />} />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke="#0284c7"
-            strokeWidth={2}
-            dot={isSinglePoint ? { r: 6, fill: "#0284c7" } : { r: 2.5 }}
-            activeDot={{ r: 5, fill: "#0284c7", stroke: "#fff", strokeWidth: 2 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+            <YAxis
+              domain={[yMin - padding, yMax + padding]}
+              tick={{ fontSize: 11, fill: "#64748b" }}
+              tickLine={false}
+              axisLine={{ stroke: "#cbd5e1" }}
+              label={{
+                value: info.unit,
+                angle: -90,
+                position: "insideLeft",
+                style: { fontSize: 11, fill: "#94a3b8" },
+              }}
+            />
+            <Tooltip content={<CustomTooltip unit={info.unit} />} />
+            <Area
+              type="monotone"
+              dataKey="value"
+              fill={`url(#gradient-${metricKey})`}
+              stroke="none"
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#0284c7"
+              strokeWidth={2.5}
+              dot={isSinglePoint ? { r: 6, fill: "#0284c7" } : { r: 2.5 }}
+              activeDot={{ r: 5, fill: "#0284c7", stroke: "#fff", strokeWidth: 2 }}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

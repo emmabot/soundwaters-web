@@ -154,10 +154,13 @@ function LoadingOverlay() {
       <div
         style={{
           marginTop: 12,
-          background: "rgba(255,255,255,0.9)",
-          borderRadius: 8,
+          background: "rgba(255,255,255,0.7)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderRadius: 12,
           padding: "8px 16px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+          border: "1px solid rgba(255,255,255,0.3)",
           fontSize: 14,
           fontWeight: 500,
           color: "#0369a1",
@@ -189,10 +192,13 @@ function Legend({ typeCounts }: { typeCounts: Record<string, number> }) {
     <div
       style={{
         margin: "0 0 24px 10px",
-        background: "rgba(255,255,255,0.95)",
-        borderRadius: 10,
+        background: "rgba(255,255,255,0.7)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderRadius: 12,
         padding: "10px 14px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+        border: "1px solid rgba(255,255,255,0.3)",
         fontSize: 12,
         lineHeight: 1.6,
         minWidth: 140,
