@@ -11,15 +11,14 @@ import {
 } from "@vis.gl/react-google-maps";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import type { Station } from "@/lib/stations";
-import { fetchStations, getStationsWithCoordinates } from "@/lib/stations";
 
-const TYPE_COLORS: Record<string, string> = {
+export const TYPE_COLORS: Record<string, string> = {
   "River/Stream": "#3B82F6",
   Estuary: "#14B8A6",
   "BEACH Program Site-Estuary": "#F97316",
   "Lake, Reservoir, Impoundment": "#A855F7",
 };
-const DEFAULT_COLOR = "#6B7280";
+export const DEFAULT_COLOR = "#6B7280";
 const LIS_CENTER = { lat: 41.15, lng: -73.35 };
 const DEFAULT_ZOOM = 10;
 
@@ -27,7 +26,7 @@ function colorForType(t: string) {
   return TYPE_COLORS[t] ?? DEFAULT_COLOR;
 }
 
-function labelForType(t: string) {
+export function labelForType(t: string) {
   if (t === "BEACH Program Site-Estuary") return "Beach";
   if (t === "Lake, Reservoir, Impoundment") return "Lake/Reservoir";
   return t;
@@ -242,16 +241,17 @@ function Legend({ typeCounts }: { typeCounts: Record<string, number> }) {
 /* ── Main component ── */
 
 export default function StationMap({
+  stations,
+  loading = false,
   onStationSelect,
   onDeselect,
 }: {
+  stations: Station[];
+  loading?: boolean;
   onStationSelect?: (station: Station) => void;
   onDeselect?: () => void;
-} = {}) {
+}) {
   const map = useMap();
-  const [stations, setStations] = useState<Station[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [selectedMarker, setSelectedMarker] =
     useState<google.maps.marker.AdvancedMarkerElement | null>(null);
@@ -260,25 +260,6 @@ export default function StationMap({
   const markerRefs = useRef<
     Map<string, google.maps.marker.AdvancedMarkerElement>
   >(new Map());
-
-  /* load station data */
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const all = await fetchStations();
-        if (!cancelled) setStations(getStationsWithCoordinates(all));
-      } catch (e) {
-        if (!cancelled)
-          setError(e instanceof Error ? e.message : "Failed to load stations");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   /* initialise clusterer */
   useEffect(() => {
@@ -323,14 +304,6 @@ export default function StationMap({
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
-
-  if (error) {
-    return (
-      <div className="flex h-full items-center justify-center bg-red-50 text-red-600">
-        <p className="text-center text-sm font-medium">⚠️ {error}</p>
-      </div>
-    );
-  }
 
   return (
     <GoogleMap

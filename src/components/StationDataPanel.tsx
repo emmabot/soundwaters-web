@@ -11,6 +11,7 @@ import WaterQualityGradeCards from "./WaterQualityGradeCard";
 import MetricTabs from "./MetricTabs";
 import TrendChart from "./TrendChart";
 import MetricExplanation from "./MetricExplanation";
+import DataSummaryBar from "./DataSummaryBar";
 
 type FetchState =
   | { status: "loading" }
@@ -184,6 +185,7 @@ export default function StationDataPanel({
               transition={{ duration: 0.3 }}
               className="space-y-4 p-4"
             >
+              <DataSummaryBar metrics={state.metrics} />
               <WaterQualityGradeCards
                 metrics={state.metrics}
                 activeMetric={activeMetric}
