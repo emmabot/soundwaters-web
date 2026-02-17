@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Station } from "@/lib/stations";
 import { TYPE_COLORS, DEFAULT_COLOR } from "@/components/Map";
 import {
-  CURATED_STATIONS,
   fetchRankingsData,
   rankStations,
   type RankingCategory,
@@ -121,15 +120,37 @@ export default function RankingsPanel({ isOpen, onClose, onSelectStation, allSta
   const [isLoading, setIsLoading] = useState(false);
   const cacheRef = useRef<StationRanking[] | null>(null);
 
-  const loadRankings = useCallback(async () => {
-    if (cacheRef.current) { setRankings(cacheRef.current); return; }
-    setIsLoading(true);
-    setProgress({ completed: 0, total: CURATED_STATIONS.length });
-    const data = await fetchRankingsData(CURATED_STATIONS, (c, t) => setProgress({ completed: c, total: t }));
+  // Build a lookup map for resolving station names/types
+  const stationMap = useRef<Map<string, Station>>(new Map());
+  useEffect(() => {
+    const m = new Map<string, Station>();
+    for (const s of allStations) m.set(s.id, s);
+    stationMap.current = m;
+  }, [allStations]);
+
+  function resolveStationInfo(data: StationRanking[]) {
     for (const r of data) {
-      const match = allStations.find((s) => s.id === r.stationId);
+      const match = stationMap.current.get(r.stationId);
       if (match) { r.stationName = match.name; r.stationType = match.type; }
     }
+  }
+
+  const loadRankings = useCallback(async () => {
+    if (cacheRef.current) { setRankings(cacheRef.current); return; }
+    const ids = allStations.map((s) => s.id);
+    if (ids.length === 0) return;
+    setIsLoading(true);
+    setProgress({ completed: 0, total: ids.length });
+    const data = await fetchRankingsData(
+      ids,
+      (c, t) => setProgress({ completed: c, total: t }),
+      (partial) => {
+        // Show progressive results as stations complete
+        resolveStationInfo(partial);
+        setRankings([...partial]);
+      },
+    );
+    resolveStationInfo(data);
     cacheRef.current = data;
     setRankings(data);
     setIsLoading(false);
@@ -157,7 +178,7 @@ export default function RankingsPanel({ isOpen, onClose, onSelectStation, allSta
             <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4">
               <div>
                 <h2 className="text-lg font-bold text-white">🏆 Station Rankings</h2>
-                <p className="text-xs text-ocean-200">{rankings ? `${rankings.length} stations ranked` : "Loading..."}</p>
+                <p className="text-xs text-ocean-200">{rankings ? `${rankings.length} stations with data` : "Loading..."}</p>
               </div>
               <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110" aria-label="Close rankings">✕</button>
             </div>
@@ -182,19 +203,19 @@ export default function RankingsPanel({ isOpen, onClose, onSelectStation, allSta
                 </div>
               )}
 
-              {!isLoading && ranked.length === 0 && rankings && (
+              {ranked.length === 0 && !isLoading && rankings && (
                 <div className="py-8 text-center">
                   <p className="text-sm text-ocean-500">{category === "safest-swimming" ? "No bacteria data available for these stations 🏖️" : "No data available for this category"}</p>
                 </div>
               )}
 
-              {!isLoading && ranked.length > 0 && (
+              {ranked.length > 0 && (
                 <div className="space-y-1.5">
                   {category === "needs-data" && (
                     <p className="mb-2 rounded-lg bg-ocean-50 px-3 py-2 text-xs text-ocean-600">These stations could use more monitoring! 🔬</p>
                   )}
                   {ranked.map((r, idx) => (
-                    <RankingItem key={r.stationId} ranking={r} rank={idx + 1} category={category} onClick={() => onSelectStation(r.stationId)} delay={idx * 0.03} />
+                    <RankingItem key={r.stationId} ranking={r} rank={idx + 1} category={category} onClick={() => onSelectStation(r.stationId)} delay={Math.min(idx * 0.02, 0.6)} />
                   ))}
                 </div>
               )}

@@ -3,59 +3,6 @@ import { processWaterQualityData, type MetricData } from "@/lib/water-quality-da
 import { getGrade, type MetricKey, type Grade } from "@/lib/thresholds";
 import { computeTrend } from "@/lib/trend-analysis";
 
-/* ── Curated station list (~40 stations with geographic spread & type diversity) ── */
-
-export const CURATED_STATIONS: string[] = [
-  // USGS — Rivers/Streams (western to eastern)
-  "USGS-01201487",   // Still River, Brookfield
-  "USGS-01208925",   // Mill River, Fairfield
-  "USGS-01208873",   // Rooster River, Fairfield
-  "USGS-01209500",   // Saugatuck River, Westport
-  "USGS-01209710",   // Norwalk River, Winnipauk
-  "USGS-01210310",   // E Branch Mianus River, Stamford
-  "USGS-01211106",   // Greenwich Creek, Cos Cob
-  // USGS — Estuaries
-  "USGS-01208822",   // Housatonic River, Stratford (tidal)
-  "USGS-01209510",   // Saugatuck River, Westport (tidal)
-  "USGS-410502073236000", // Norwalk Harbor
-  "USGS-410606073245700", // Norwalk River at Aquarium
-  "USGS-410729073171701", // Mill River, Southport Harbor
-  // CT DEP — Rivers
-  "CT_DEP01_WQX-14360",  // Norwalk River
-  "CT_DEP01_WQX-14444",  // Saugatuck River
-  "CT_DEP01_WQX-14458",  // Still River
-  "CT_DEP01_WQX-15857",  // Mill River
-  "CT_DEP01_WQX-16958",  // Pequonnock River
-  "CT_DEP01_WQX-16649",  // Farmill River
-  // CT DEP — Estuaries (Long Island Sound transect)
-  "CT_DEP01_WQX-17217",  // Station 01 (western Sound)
-  "CT_DEP01_WQX-17221",  // Station 05
-  "CT_DEP01_WQX-17224",  // Station 08
-  "CT_DEP01_WQX-17226",  // Station 12
-  "CT_DEP01_WQX-17230",  // Station 18
-  "CT_DEP01_WQX-17234",  // Station 22 (eastern Sound)
-  // CT DEP — Lakes/Reservoirs
-  "CT_DEP01_WQX-15943",  // Squantz Pond
-  "CT_DEP01_WQX-18148",  // Ball Pond
-  "CT_DEP01_WQX-19337",  // Mamanasco Lake
-  "CT_DEP01_WQX-15627",  // Lake Kenosia
-  // Beach stations (spread along coast)
-  "1CTDPHBM-500",   // Greenwich Point Beach
-  "1CTDPHBM-1000",  // Byram Beach
-  "1CTDPHBM-1800",  // East (Cove Island) Beach, Stamford
-  "1CTDPHBM-3100",  // Calf Pasture Beach, Norwalk
-  "1CTDPHBM-3800",  // Compo Beach, Westport
-  "1CTDPHBM-13400", // Sherwood Island State Park
-  "1CTDPHBM-5000",  // Jennings Beach, Fairfield
-  "1CTDPHBM-5700",  // Long Beach, Stratford
-  "1CTDPHBM-6000",  // Short Beach, Stratford
-  // Community / Harbor monitoring
-  "STS-NWH-I-01",   // Norwalk Harbor
-  "STS-COV-01",     // Cove Harbor, Stamford
-  "STS-HOU-O-03",   // Housatonic River estuary
-  "ASHCREEKCONSERVATIONASSOC-Bridgeport-Harbor-Inner-1", // Pequonnock River
-];
-
 /* ── Types ── */
 
 export type RankingCategory =
@@ -118,39 +65,50 @@ export function computeImprovementScore(metrics: MetricData[]): number {
 }
 
 
+/* ── 2-year recency filter ── */
+
+function isRecent(lastSampleDate: Date | null): boolean {
+  if (\!lastSampleDate) return false;
+  const twoYearsAgo = new Date();
+  twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+  return lastSampleDate >= twoYearsAgo;
+}
+
 /* ── Ranking function ── */
 
 export function rankStations(
   stations: StationRanking[],
   category: RankingCategory,
 ): StationRanking[] {
-  const copy = [...stations];
+  // For "needs-data", show stale/sparse stations; for all other tabs, only recent (2-year) stations
+  if (category === "needs-data") {
+    const stale = stations.filter((s) => \!isRecent(s.lastSampleDate) || s.metricsAvailable <= 2 || s.totalReadings < 10);
+    return stale.sort((a, b) => a.totalReadings - b.totalReadings);
+  }
+
+  const recent = stations.filter((s) => isRecent(s.lastSampleDate));
 
   switch (category) {
     case "cleanest":
-      return copy.sort((a, b) => b.overallGrade - a.overallGrade);
+      return recent.sort((a, b) => b.overallGrade - a.overallGrade);
     case "most-polluted":
-      return copy.sort((a, b) => a.overallGrade - b.overallGrade);
-    case "best-for-fish": {
-      return copy.sort((a, b) => {
+      return recent.sort((a, b) => a.overallGrade - b.overallGrade);
+    case "best-for-fish":
+      return recent.sort((a, b) => {
         const sa = computeFishScore(a.metricGrades) ?? -1;
         const sb = computeFishScore(b.metricGrades) ?? -1;
         return sb - sa;
       });
-    }
-    case "safest-swimming": {
-      return copy.sort((a, b) => {
+    case "safest-swimming":
+      return recent.sort((a, b) => {
         const sa = computeSwimmingScore(a.metricGrades) ?? -1;
         const sb = computeSwimmingScore(b.metricGrades) ?? -1;
         return sb - sa;
       });
-    }
     case "most-improved":
-      return copy.sort((a, b) => b.trendPercent - a.trendPercent);
-    case "needs-data":
-      return copy.sort((a, b) => a.totalReadings - b.totalReadings);
+      return recent.sort((a, b) => b.trendPercent - a.trendPercent);
     default:
-      return copy;
+      return recent;
   }
 }
 
@@ -159,12 +117,13 @@ export function rankStations(
 export async function fetchRankingsData(
   stationIds: string[],
   onProgress: (completed: number, total: number) => void,
+  onPartialResults?: (results: StationRanking[]) => void,
 ): Promise<StationRanking[]> {
   const results: StationRanking[] = [];
   let completed = 0;
   const total = stationIds.length;
 
-  // Simple semaphore for concurrency limit of 5
+  // Simple semaphore for concurrency limit of 10
   let running = 0;
   const queue = [...stationIds];
 
@@ -207,12 +166,13 @@ export async function fetchRankingsData(
 
   return new Promise((resolve) => {
     function next() {
-      while (running < 5 && queue.length > 0) {
+      while (running < 10 && queue.length > 0) {
         const id = queue.shift()!;
         running++;
         processStation(id)
           .then((ranking) => {
             if (ranking) results.push(ranking);
+            onPartialResults?.(results);
           })
           .catch(() => {
             // Skip failed stations
