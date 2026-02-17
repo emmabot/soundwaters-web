@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -10,10 +11,12 @@ import {
   CartesianGrid,
   Tooltip,
   ReferenceArea,
+  ReferenceLine,
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import { RANGE_BANDS, METRIC_INFO, type MetricKey } from "@/lib/thresholds";
 import type { DataPoint } from "@/lib/water-quality-data";
+import { computeTrend } from "@/lib/trend-analysis";
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -56,8 +59,28 @@ export default function TrendChart({
   metricKey: MetricKey;
   points: DataPoint[];
 }) {
+  const [showTrend, setShowTrend] = useState(false);
   const info = METRIC_INFO[metricKey];
   const bands = RANGE_BANDS[metricKey];
+
+  const trend = useMemo(() => computeTrend(points), [points]);
+
+  // Build trend line data: two-point line from regression start to end
+  const trendLineData = useMemo(() => {
+    if (!trend || points.length < 2) return null;
+    return [
+      { date: points[0].date, trend: Math.round(trend.startValue * 100) / 100 },
+      { date: points[points.length - 1].date, trend: Math.round(trend.endValue * 100) / 100 },
+    ];
+  }, [trend, points]);
+
+  const trendLabel = trend
+    ? trend.direction === "improving"
+      ? "↑ Improving"
+      : trend.direction === "declining"
+        ? "↓ Declining"
+        : "→ Stable"
+    : "";
 
   // Compute Y domain from data + bands
   const values = points.map((p) => p.value);
@@ -70,6 +93,16 @@ export default function TrendChart({
 
   const isSinglePoint = points.length === 1;
 
+  // Merge trend data into points for the trend line
+  const chartData = useMemo(() => {
+    if (!showTrend || !trendLineData) return points;
+    const trendMap = new Map(trendLineData.map((t) => [t.date, t.trend]));
+    return points.map((p) => ({
+      ...p,
+      trend: trendMap.get(p.date) ?? undefined,
+    }));
+  }, [points, showTrend, trendLineData]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -78,11 +111,21 @@ export default function TrendChart({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.3 }}
-        className="glass h-64 w-full rounded-xl p-3 sm:h-72 md:h-80"
+        className="glass relative h-64 w-full rounded-xl p-3 sm:h-72 md:h-80"
       >
+        {/* Trend toggle button */}
+        {trend && points.length >= 3 && (
+          <button
+            onClick={() => setShowTrend((s) => !s)}
+            className="absolute right-4 top-4 z-10 rounded-lg bg-ocean-50/80 px-2.5 py-1 text-xs font-medium text-ocean-600 shadow-sm backdrop-blur transition-all hover:bg-ocean-100 hover:text-ocean-800"
+          >
+            {showTrend ? "Hide trend" : "📈 Show trend"}
+          </button>
+        )}
+
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
-            data={points}
+            data={chartData}
             margin={{ top: 10, right: 20, left: 10, bottom: 5 }}
           >
             <defs>
@@ -136,6 +179,31 @@ export default function TrendChart({
               dot={isSinglePoint ? { r: 6, fill: "#0284c7" } : { r: 2.5 }}
               activeDot={{ r: 5, fill: "#0284c7", stroke: "#fff", strokeWidth: 2 }}
             />
+            {showTrend && trendLineData && (
+              <>
+                <Line
+                  type="linear"
+                  dataKey="trend"
+                  stroke="#f97316"
+                  strokeWidth={2}
+                  strokeDasharray="6 4"
+                  dot={false}
+                  connectNulls
+                  isAnimationActive={false}
+                />
+                <ReferenceLine
+                  y={trendLineData[1].trend}
+                  stroke="none"
+                  label={{
+                    value: trendLabel,
+                    position: "right",
+                    fill: "#f97316",
+                    fontSize: 11,
+                    fontWeight: 600,
+                  }}
+                />
+              </>
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </motion.div>
