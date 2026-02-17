@@ -109,11 +109,22 @@ export default function TrendChart({
   const [showWeather, setShowWeather] = useState(false);
   const [weatherDaily, setWeatherDaily] = useState<DailyWeather[] | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const [timePeriod, setTimePeriod] = useState<'1y' | '5y' | 'all'>('all');
 
   const info = METRIC_INFO[metricKey];
   const bands = RANGE_BANDS[metricKey];
 
-  const canShowWeather = lat != null && lng != null && points.length >= 2;
+  // Filter points by selected time period
+  const filteredPoints = useMemo(() => {
+    if (timePeriod === 'all') return points;
+    const now = new Date();
+    const cutoff = new Date();
+    if (timePeriod === '1y') cutoff.setFullYear(now.getFullYear() - 1);
+    if (timePeriod === '5y') cutoff.setFullYear(now.getFullYear() - 5);
+    return points.filter(p => new Date(p.date) >= cutoff);
+  }, [points, timePeriod]);
+
+  const canShowWeather = lat != null && lng != null && filteredPoints.length >= 2;
 
   // Fetch weather when toggled on
   useEffect(() => {
@@ -121,7 +132,7 @@ export default function TrendChart({
     let cancelled = false;
     (async () => {
       setWeatherLoading(true);
-      const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
+      const sorted = [...filteredPoints].sort((a, b) => a.date.localeCompare(b.date));
       const startDate = sorted[0].date.slice(0, 10);
       const endDate = sorted[sorted.length - 1].date.slice(0, 10);
       const data = await fetchWeatherData(lat!, lng!, startDate, endDate);
@@ -131,23 +142,23 @@ export default function TrendChart({
       }
     })();
     return () => { cancelled = true; };
-  }, [showWeather, canShowWeather, weatherDaily, points, lat, lng]);
+  }, [showWeather, canShowWeather, weatherDaily, filteredPoints, lat, lng]);
 
-  // Reset weather cache when station/metric changes
+  // Reset weather cache when station/metric changes or time period changes
   useEffect(() => {
     setWeatherDaily(null);
     setShowWeather(false);
-  }, [lat, lng]);
+  }, [lat, lng, timePeriod]);
 
-  const trend = useMemo(() => computeTrend(points), [points]);
+  const trend = useMemo(() => computeTrend(filteredPoints), [filteredPoints]);
 
   const trendLineData = useMemo(() => {
-    if (!trend || points.length < 2) return null;
+    if (!trend || filteredPoints.length < 2) return null;
     return [
-      { date: points[0].date, trend: Math.round(trend.startValue * 100) / 100 },
-      { date: points[points.length - 1].date, trend: Math.round(trend.endValue * 100) / 100 },
+      { date: filteredPoints[0].date, trend: Math.round(trend.startValue * 100) / 100 },
+      { date: filteredPoints[filteredPoints.length - 1].date, trend: Math.round(trend.endValue * 100) / 100 },
     ];
-  }, [trend, points]);
+  }, [trend, filteredPoints]);
 
   const trendLabel = trend
     ? trend.direction === "improving"
@@ -158,7 +169,7 @@ export default function TrendChart({
     : "";
 
   // Compute Y domain from data + bands
-  const values = points.map((p) => p.value);
+  const values = filteredPoints.map((p) => p.value);
   const bandMaxes = bands.map((b) => b.y2);
   const bandMins = bands.map((b) => b.y1);
   const allVals = [...values, ...bandMaxes, ...bandMins];
@@ -166,7 +177,7 @@ export default function TrendChart({
   const yMax = Math.ceil(Math.max(...allVals));
   const padding = Math.max((yMax - yMin) * 0.1, 1);
 
-  const isSinglePoint = points.length === 1;
+  const isSinglePoint = filteredPoints.length === 1;
 
   // Merge chart data: water quality + optional trend + optional weather
   const chartData = useMemo(() => {
@@ -177,7 +188,7 @@ export default function TrendChart({
       ? new Map(weatherDaily.map((w) => [w.date, w]))
       : null;
 
-    return points.map((p) => {
+    return filteredPoints.map((p) => {
       const dateKey = p.date.slice(0, 10);
       const entry: Record<string, unknown> = { ...p };
       if (trendMap) {
@@ -192,14 +203,14 @@ export default function TrendChart({
       }
       return entry;
     });
-  }, [points, showTrend, trendLineData, showWeather, weatherDaily]);
+  }, [filteredPoints, showTrend, trendLineData, showWeather, weatherDaily]);
 
   // Seasonal summer highlights (Jun-Aug)
   const summerBands = useMemo(() => {
     const result: { x1: string; x2: string }[] = [];
     let start: string | null = null;
     let prev: string | null = null;
-    for (const p of points) {
+    for (const p of filteredPoints) {
       const month = new Date(p.date).getMonth() + 1;
       if (month >= 6 && month <= 8) {
         if (!start) start = p.date;
@@ -212,20 +223,20 @@ export default function TrendChart({
     }
     if (start && prev) result.push({ x1: start, x2: prev });
     return result;
-  }, [points]);
+  }, [filteredPoints]);
 
   // Min/max outlier annotations
   const { minPoint, maxPoint } = useMemo(() => {
-    if (points.length === 0) return { minPoint: null, maxPoint: null };
-    let min = points[0];
-    let max = points[0];
-    for (const p of points) {
+    if (filteredPoints.length === 0) return { minPoint: null, maxPoint: null };
+    let min = filteredPoints[0];
+    let max = filteredPoints[0];
+    for (const p of filteredPoints) {
       if (p.value < min.value) min = p;
       if (p.value > max.value) max = p;
     }
-    if (points.length < 3 || min.value === max.value) return { minPoint: null, maxPoint: null };
+    if (filteredPoints.length < 3 || min.value === max.value) return { minPoint: null, maxPoint: null };
     return { minPoint: min, maxPoint: max };
-  }, [points]);
+  }, [filteredPoints]);
 
   // Weather Y-axis domain
   const weatherYDomain = useMemo(() => {
@@ -251,6 +262,21 @@ export default function TrendChart({
       >
         {/* Toggle buttons */}
         <div className="absolute right-4 top-4 z-10 flex gap-1.5">
+          <div className="flex gap-1">
+            {(['1y', '5y', 'all'] as const).map((period) => (
+              <button
+                key={period}
+                onClick={() => setTimePeriod(period)}
+                className={`rounded-md px-2 py-0.5 text-[10px] font-medium transition-all ${
+                  timePeriod === period
+                    ? 'bg-ocean-600 text-white'
+                    : 'bg-ocean-50/80 text-ocean-600 hover:bg-ocean-100'
+                }`}
+              >
+                {period === '1y' ? '1Y' : period === '5y' ? '5Y' : 'All'}
+              </button>
+            ))}
+          </div>
           {canShowWeather && (
             <button
               onClick={() => setShowWeather((s) => !s)}
@@ -263,7 +289,7 @@ export default function TrendChart({
               {weatherLoading ? "⏳ Loading..." : showWeather ? "🌤️ Hide weather" : "🌤️ Weather"}
             </button>
           )}
-          {trend && points.length >= 3 && (
+          {trend && filteredPoints.length >= 3 && (
             <button
               onClick={() => setShowTrend((s) => !s)}
               className="rounded-lg bg-ocean-50/80 px-2.5 py-1 text-xs font-medium text-ocean-600 shadow-sm backdrop-blur transition-all hover:bg-ocean-100 hover:text-ocean-800"
@@ -273,6 +299,12 @@ export default function TrendChart({
           )}
         </div>
 
+        {filteredPoints.length === 0 ? (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-sm text-ocean-500">No data in this time period</p>
+          </div>
+        ) : (
+        <>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
@@ -469,6 +501,8 @@ export default function TrendChart({
               Rain
             </span>
           </div>
+        )}
+        </>
         )}
       </motion.div>
     </AnimatePresence>
