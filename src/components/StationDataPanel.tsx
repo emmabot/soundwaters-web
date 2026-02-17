@@ -49,7 +49,7 @@ function LoadingSkeleton() {
   );
 }
 
-function ConsistencyBadge({ metrics }: { metrics: MetricData[] }) {
+function ConsistencyBadge({ metrics, stationType }: { metrics: MetricData[]; stationType: string }) {
   let totalReadings = 0;
   let lastDate: Date | null = null;
   for (const m of metrics) {
@@ -57,12 +57,40 @@ function ConsistencyBadge({ metrics }: { metrics: MetricData[] }) {
     const d = new Date(m.latestDate);
     if (!lastDate || d > lastDate) lastDate = d;
   }
-  const { level, detail } = computeConsistency(metrics.length, totalReadings, lastDate);
+  const metricsAvailable = metrics.length;
+  const { level, detail } = computeConsistency(metricsAvailable, totalReadings, lastDate);
+
+  // Station-type-aware badge
+  if (stationType === "BEACH Program Site-Estuary") {
+    return (
+      <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+        <span className="text-base">🏖️</span>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-amber-700">Beach monitoring — bacteria &amp; temperature focus</p>
+          <p className="text-xs text-ocean-500 mt-0.5">{detail}</p>
+        </div>
+      </div>
+    );
+  }
+
+  let typeLabel: string | null = null;
+  let typeEmoji: string | null = null;
+  if (stationType === "River/Stream") {
+    typeEmoji = "🌊";
+    typeLabel = `River station — ${metricsAvailable} of 5 water quality metrics`;
+  } else if (stationType === "Estuary") {
+    typeEmoji = "🌿";
+    typeLabel = `Estuary monitoring — ${metricsAvailable} of 5 metrics`;
+  } else if (stationType === "Lake, Reservoir, Impoundment") {
+    typeEmoji = "🏔️";
+    typeLabel = `Lake monitoring — ${metricsAvailable} of 5 metrics`;
+  }
+
   const badge = level === "excellent"
-    ? { emoji: "⭐", label: "Excellent monitoring", bg: "bg-green-50", text: "text-green-700", border: "border-green-200" }
+    ? { emoji: typeEmoji ?? "⭐", label: typeLabel ?? "Excellent monitoring", bg: "bg-green-50", text: "text-green-700", border: "border-green-200" }
     : level === "good"
-    ? { emoji: "✅", label: "Good coverage", bg: "bg-ocean-50", text: "text-ocean-700", border: "border-ocean-200" }
-    : { emoji: "⚠️", label: "Limited data", bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" };
+    ? { emoji: typeEmoji ?? "✅", label: typeLabel ?? "Good coverage", bg: "bg-ocean-50", text: "text-ocean-700", border: "border-ocean-200" }
+    : { emoji: typeEmoji ?? "⚠️", label: typeLabel ?? "Limited data", bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" };
 
   return (
     <div className={`flex items-start gap-2 rounded-xl border ${badge.border} ${badge.bg} px-3 py-2`}>
@@ -223,7 +251,7 @@ export default function StationDataPanel({
               transition={{ duration: 0.3 }}
               className="space-y-4 p-4"
             >
-              <ConsistencyBadge metrics={state.metrics} />
+              <ConsistencyBadge metrics={state.metrics} stationType={station.type} />
               <DataSummaryBar metrics={state.metrics} />
               <TrendInsights metrics={state.metrics} />
               <WaterQualityGradeCards
