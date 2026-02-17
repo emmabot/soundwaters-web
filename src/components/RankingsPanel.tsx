@@ -181,7 +181,7 @@ export default function RankingsPanel({ isOpen, onClose, onSelectStation, allSta
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="pointer-events-auto absolute left-0 top-[120px] z-20 flex h-[calc(100%-120px)] max-h-[85vh] sm:max-h-full sm:top-0 sm:h-full w-full flex-col overflow-hidden rounded-r-2xl shadow-2xl sm:w-[380px]"
+            className="pointer-events-auto absolute left-0 top-[var(--nav-mobile-offset)] z-20 flex h-[calc(100%-var(--nav-mobile-offset))] max-h-[85vh] sm:max-h-full sm:top-0 sm:h-full w-full flex-col overflow-hidden rounded-r-2xl shadow-2xl sm:w-[380px]"
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={{ left: 0.5, right: 0 }}
