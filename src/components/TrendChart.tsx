@@ -31,6 +31,10 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 
+function toDisplayTemp(celsius: number, unit: 'C' | 'F'): number {
+  return unit === 'F' ? celsius * 9 / 5 + 32 : celsius;
+}
+
 type WeatherTooltipProps = {
   active?: boolean;
   payload?: ReadonlyArray<ChartTooltipPayloadItem>;
@@ -38,6 +42,7 @@ type WeatherTooltipProps = {
   unit: string;
   metricKey: MetricKey;
   showWeather: boolean;
+  tempUnit: 'C' | 'F';
 };
 
 function WeatherTooltip({
@@ -47,6 +52,7 @@ function WeatherTooltip({
   unit,
   metricKey,
   showWeather,
+  tempUnit,
 }: WeatherTooltipProps) {
   if (!active || !payload?.length) return null;
   const valuePl = payload.find((p: ChartTooltipPayloadItem) => p.dataKey === "value");
@@ -85,7 +91,7 @@ function WeatherTooltip({
         <div className="mt-1.5 border-t border-ocean-200 pt-1.5">
           {airTemp != null && (
             <p className="text-xs text-amber-700">
-              🌡️ Air: {airTemp.toFixed(1)}°C
+              🌡️ Air: {toDisplayTemp(airTemp, tempUnit).toFixed(1)}°{tempUnit}
             </p>
           )}
           {precip != null && precip > 0 && (
@@ -115,6 +121,7 @@ export default function TrendChart({
   const [weatherDaily, setWeatherDaily] = useState<DailyWeather[] | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [timePeriod, setTimePeriod] = useState<'1y' | '5y' | 'all'>('all');
+  const [tempUnit, setTempUnit] = useState<'C' | 'F'>('C');
 
   const info = METRIC_INFO[metricKey];
   const bands = RANGE_BANDS[metricKey];
@@ -153,6 +160,7 @@ export default function TrendChart({
   useEffect(() => {
     setWeatherDaily(null);
     setShowWeather(false);
+    setTempUnit('C');
   }, [lat, lng, timePeriod]);
 
   const trend = useMemo(() => computeTrend(filteredPoints), [filteredPoints]);
@@ -294,6 +302,23 @@ export default function TrendChart({
               {weatherLoading ? "⏳ Loading..." : showWeather ? "🌤️ Hide weather" : "🌤️ Weather"}
             </button>
           )}
+          {showWeather && weatherDaily && (
+            <div className="flex rounded-lg bg-ocean-50/80 shadow-sm backdrop-blur">
+              {(['C', 'F'] as const).map((u) => (
+                <button
+                  key={u}
+                  onClick={() => setTempUnit(u)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+                    tempUnit === u
+                      ? 'bg-amber-100/90 text-amber-700'
+                      : 'text-ocean-600 hover:bg-ocean-100 hover:text-ocean-800'
+                  }`}
+                >
+                  °{u}
+                </button>
+              ))}
+            </div>
+          )}
           {trend && filteredPoints.length >= 3 && (
             <button
               onClick={() => setShowTrend((s) => !s)}
@@ -303,6 +328,15 @@ export default function TrendChart({
             </button>
           )}
         </div>
+
+        {/* Bacteria-precipitation callout */}
+        {metricKey === 'bacteria' && showWeather && (
+          <div className="absolute left-4 top-4 z-10">
+            <span className="inline-block rounded px-2 py-0.5 text-xs text-blue-700 bg-blue-50">
+              💧 Rain can wash bacteria into waterways — look for spikes after storms
+            </span>
+          </div>
+        )}
 
         {filteredPoints.length === 0 ? (
           <div className="flex h-full items-center justify-center">
@@ -370,10 +404,11 @@ export default function TrendChart({
                 orientation="right"
                 domain={weatherYDomain}
                 tick={{ fontSize: 10, fill: "#d97706" }}
+                tickFormatter={(v: number) => toDisplayTemp(v, tempUnit).toFixed(0)}
                 tickLine={false}
                 axisLine={{ stroke: "#fbbf24", strokeDasharray: "3 3" }}
                 label={{
-                  value: "°C / mm",
+                  value: `°${tempUnit} / mm`,
                   angle: 90,
                   position: "insideRight",
                   style: { fontSize: 10, fill: "#d97706" },
@@ -386,6 +421,7 @@ export default function TrendChart({
                   unit={info.unit}
                   metricKey={metricKey}
                   showWeather={showWeather}
+                  tempUnit={tempUnit}
                 />
               }
             />
@@ -499,7 +535,7 @@ export default function TrendChart({
           <div className="absolute bottom-12 left-4 flex gap-3 rounded-lg bg-white/80 px-2.5 py-1 text-[10px] shadow-sm backdrop-blur">
             <span className="flex items-center gap-1 text-amber-700">
               <span className="inline-block h-0.5 w-3 border-b border-dashed border-amber-500" />
-              Air temp
+              Air temp (°{tempUnit})
             </span>
             <span className="flex items-center gap-1 text-blue-600">
               <span className="inline-block h-2.5 w-2 rounded-sm bg-blue-400/40" />
