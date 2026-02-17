@@ -1,9 +1,7 @@
 "use client";
 
-import { APIProvider, Map } from "@vis.gl/react-google-maps";
-
-const LONG_ISLAND_SOUND_CENTER = { lat: 41.1, lng: -72.8 };
-const DEFAULT_ZOOM = 9;
+import { APIProvider } from "@vis.gl/react-google-maps";
+import StationMap from "@/components/Map";
 
 export default function Home() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
@@ -25,16 +23,10 @@ export default function Home() {
 
       {/* Map area */}
       <section className="overflow-hidden rounded-xl bg-white shadow-sm">
-        <div className="h-[500px] w-full">
+        <div className="h-[500px] w-full md:h-[600px] lg:h-[700px]">
           {apiKey ? (
             <APIProvider apiKey={apiKey}>
-              <Map
-                defaultCenter={LONG_ISLAND_SOUND_CENTER}
-                defaultZoom={DEFAULT_ZOOM}
-                gestureHandling="greedy"
-                mapId="soundwaters-map"
-                className="h-full w-full"
-              />
+              <StationMap />
             </APIProvider>
           ) : (
             <div className="flex h-full items-center justify-center bg-ocean-100 text-ocean-600">
