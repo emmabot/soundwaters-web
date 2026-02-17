@@ -45,6 +45,11 @@ function AboutModal({ onClose }: { onClose: () => void }) {
           <div>
             <h3 className="text-sm font-bold text-ocean-800">📊 About This Data</h3>
             <p className="mt-1 text-sm text-ocean-600 leading-relaxed">
+              This app tracks five key water quality indicators: dissolved oxygen,
+              pH, water temperature, nitrogen, and bacteria. Each gets a letter
+              grade from A to F based on EPA standards.
+            </p>
+            <p className="mt-2 text-sm text-ocean-600 leading-relaxed">
               All water quality data comes from the{" "}
               <span className="font-semibold text-ocean-700">EPA Water Quality Portal</span>,
               a national database of water monitoring results collected by federal, state, and

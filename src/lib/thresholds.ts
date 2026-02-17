@@ -63,7 +63,7 @@ function gradeNitrogen(v: number): Grade {
   return "F";
 }
 
-/* ── Enterococci / Bacteria (CFU/100mL) ── */
+/* ── Bacteria indicators: Enterococcus, Fecal Coliform, E. coli (CFU/100mL) ── */
 function gradeBacteria(v: number): Grade {
   if (v < 35) return "A";
   if (v <= 104) return "B";

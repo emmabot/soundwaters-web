@@ -165,9 +165,11 @@ export function generateInsights(metricKey: MetricKey, points: DataPoint[]): str
     const healthDir = flipDirection(trend.direction, metricKey);
     const pct = Math.abs(Math.round(trend.percentChange));
     if (healthDir === "improving" && pct > 3) {
-      insights.push(`📈 ${info.name} is improving — up about ${pct}% since ${trend.period.split("–")[0] ?? trend.period}`);
+      const word = LOWER_IS_BETTER.includes(metricKey) ? "down" : "up";
+      insights.push(`📈 ${info.name} is improving — ${word} about ${pct}% since ${trend.period.split("–")[0] ?? trend.period}`);
     } else if (healthDir === "declining" && pct > 3) {
-      insights.push(`📉 ${info.name} has been declining — down about ${pct}% since ${trend.period.split("–")[0] ?? trend.period}`);
+      const word = LOWER_IS_BETTER.includes(metricKey) ? "up" : "down";
+      insights.push(`📉 ${info.name} has been declining — ${word} about ${pct}% since ${trend.period.split("–")[0] ?? trend.period}`);
     } else {
       insights.push(`➡️ ${info.name} has stayed pretty stable over ${trend.period}`);
     }

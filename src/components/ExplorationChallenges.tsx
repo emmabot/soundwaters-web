@@ -11,7 +11,7 @@ type Challenge = {
 const CHALLENGES: Challenge[] = [
   {
     text: "🔎 Can you find a station where bacteria levels are unsafe for swimming?",
-    hint: "Hint: Try checking a beach or estuary station near a city.",
+    hint: "Hint: Click an orange beach dot — bacteria data from Enterococcus or Fecal Coliform tests will show up.",
   },
   {
     text: "🌡️ Which station has the warmest water?",
@@ -23,7 +23,7 @@ const CHALLENGES: Challenge[] = [
   },
   {
     text: "🏖️ Check a beach station — is it safe to swim?",
-    hint: "Hint: Look for orange dots on the map — those are beaches.",
+    hint: "Hint: Look for orange dots on the map — those are beaches. Check the 🦠 bacteria grade card.",
   },
   {
     text: "🌿 Find a station with high nitrogen — what causes it?",

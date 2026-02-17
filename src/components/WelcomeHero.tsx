@@ -69,8 +69,9 @@ export default function WelcomeHero({
         >
           SoundWaters shows real water quality data from{" "}
           <span className="font-semibold text-white">{stationCount || 367}</span>{" "}
-          monitoring stations around Long Island Sound. Scientists and volunteers
-          collect this data to keep the Sound healthy.
+          monitoring stations around Long Island Sound. Explore five key
+          measurements — dissolved oxygen, pH, water temperature, nitrogen, and
+          bacteria — to discover how healthy the Sound is.
         </motion.p>
 
         {/* Mini-legend */}
