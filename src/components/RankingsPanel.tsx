@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Station } from "@/lib/stations";
+import { formatStationName } from "@/lib/stations";
 import { TYPE_COLORS, DEFAULT_COLOR } from "@/components/Map";
 import {
   fetchRankingsData,
@@ -131,7 +132,7 @@ export default function RankingsPanel({ isOpen, onClose, onSelectStation, allSta
   function resolveStationInfo(data: StationRanking[]) {
     for (const r of data) {
       const match = stationMap.current.get(r.stationId);
-      if (match) { r.stationName = match.name; r.stationType = match.type; }
+      if (match) { r.stationName = formatStationName(match.name); r.stationType = match.type; }
     }
   }
 

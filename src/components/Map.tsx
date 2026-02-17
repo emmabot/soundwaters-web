@@ -11,6 +11,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import type { Station } from "@/lib/stations";
+import { formatStationName } from "@/lib/stations";
 
 export const TYPE_COLORS: Record<string, string> = {
   "River/Stream": "#3B82F6",
@@ -67,7 +68,7 @@ function StationMarker({
       position={{ lat: station.lat, lng: station.lng }}
       ref={ref}
       onClick={() => onClick(station, marker)}
-      title={station.name}
+      title={formatStationName(station.name)}
     >
       <div
         style={{
@@ -105,7 +106,7 @@ function StationInfoWindow({
             color: "#075985",
           }}
         >
-          {station.name}
+          {formatStationName(station.name)}
         </h3>
         <div
           style={{

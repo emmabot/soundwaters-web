@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Station } from "@/lib/stations";
+import { formatStationName } from "@/lib/stations";
 import { TYPE_COLORS, labelForType } from "./Map";
 
 export type Filters = { search: string; types: string[]; org: string };
@@ -186,7 +187,7 @@ export default function FilterPanel({
                             : "bg-white/50 hover:bg-white/80 hover:shadow-sm"
                         }`}
                       >
-                        <p className="truncate text-sm font-semibold text-ocean-900">{s.name}</p>
+                        <p className="truncate text-sm font-semibold text-ocean-900">{formatStationName(s.name)}</p>
                         <div className="mt-1 flex items-center gap-1.5">
                           <span
                             className="inline-block h-2 w-2 rounded-full flex-shrink-0"

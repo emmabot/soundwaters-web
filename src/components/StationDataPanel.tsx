@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Station } from "@/lib/stations";
+import { formatStationName } from "@/lib/stations";
 import type { WaterQualityResult } from "@/lib/wqx-api";
 import { fetchWaterQualityResults } from "@/lib/wqx-api";
 import { processWaterQualityData, type MetricData } from "@/lib/water-quality-data";
@@ -170,7 +171,7 @@ export default function StationDataPanel({
       {/* Header */}
       <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-lg font-bold text-white">{station.name}</h3>
+          <h3 className="truncate text-lg font-bold text-white">{formatStationName(station.name)}</h3>
           <p className="truncate text-xs text-ocean-200">{station.type} · {station.orgName}</p>
         </div>
         {onCompare && (

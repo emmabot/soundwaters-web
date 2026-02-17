@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Station } from "@/lib/stations";
+import { formatStationName } from "@/lib/stations";
 import type { WaterQualityResult } from "@/lib/wqx-api";
 import { fetchWaterQualityResults } from "@/lib/wqx-api";
 import { processWaterQualityData, type MetricData } from "@/lib/water-quality-data";
@@ -175,9 +176,9 @@ export default function ComparisonPanel({
 
   const overallWinner =
     winsA > winsB
-      ? stationA.name
+      ? formatStationName(stationA.name)
       : winsB > winsA
-        ? stationB.name
+        ? formatStationName(stationB.name)
         : null;
 
   return (
@@ -199,7 +200,7 @@ export default function ComparisonPanel({
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-bold text-white">📊 Station Comparison</h3>
           <p className="mt-0.5 truncate text-xs text-ocean-200">
-            {stationA.name} vs {stationB.name}
+            {formatStationName(stationA.name)} vs {formatStationName(stationB.name)}
           </p>
         </div>
         <button
@@ -220,10 +221,10 @@ export default function ComparisonPanel({
             {/* Station name headers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-center text-xs font-semibold">
               <div className="rounded-lg bg-ocean-100 px-2 py-1.5 text-ocean-800 truncate">
-                {stationA.name}
+                {formatStationName(stationA.name)}
               </div>
               <div className="rounded-lg bg-teal-100 px-2 py-1.5 text-teal-800 truncate">
-                {stationB.name}
+                {formatStationName(stationB.name)}
               </div>
             </div>
 
