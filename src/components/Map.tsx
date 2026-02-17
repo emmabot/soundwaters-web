@@ -235,7 +235,13 @@ function Legend({ typeCounts }: { typeCounts: Record<string, number> }) {
 
 /* ── Main component ── */
 
-export default function StationMap() {
+export default function StationMap({
+  onStationSelect,
+  onDeselect,
+}: {
+  onStationSelect?: (station: Station) => void;
+  onDeselect?: () => void;
+} = {}) {
   const map = useMap();
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
@@ -300,8 +306,9 @@ export default function StationMap() {
     ) => {
       setSelectedStation(station);
       setSelectedMarker(marker);
+      onStationSelect?.(station);
     },
-    [],
+    [onStationSelect],
   );
 
   /* count stations per type for legend */
@@ -329,6 +336,7 @@ export default function StationMap() {
       onClick={() => {
         setSelectedStation(null);
         setSelectedMarker(null);
+        onDeselect?.();
       }}
     >
       {loading && <LoadingOverlay />}
@@ -349,6 +357,7 @@ export default function StationMap() {
           onClose={() => {
             setSelectedStation(null);
             setSelectedMarker(null);
+            onDeselect?.();
           }}
         />
       )}
