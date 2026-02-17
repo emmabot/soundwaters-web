@@ -15,7 +15,7 @@ export default function WaterQualityGradeCards({
   onSelect: (key: MetricKey) => void;
 }) {
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2">
+    <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
       {metrics.map((m, idx) => {
         const info = METRIC_INFO[m.key];
         const result = getGrade(m.key, m.latestValue);
@@ -29,7 +29,7 @@ export default function WaterQualityGradeCards({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.08, duration: 0.3 }}
             whileHover={{ y: -2 }}
-            className={`glass flex-shrink-0 rounded-xl border-2 p-3 text-left transition-shadow hover:shadow-lg ${
+            className={`glass flex-shrink-0 snap-start rounded-xl border-2 p-3 text-left transition-shadow hover:shadow-lg ${
               isActive
                 ? "border-ocean-400 shadow-md"
                 : "border-white/30 hover:border-ocean-200"

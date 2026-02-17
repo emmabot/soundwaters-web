@@ -69,7 +69,7 @@ function MetricRow({ row }: { row: RowData }) {
       <p className="mb-1 text-xs font-semibold text-ocean-700">
         {info.emoji} {info.name}
       </p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <GradeCell grade={row.gradeA} isWinner={row.winner === "a"} />
         <GradeCell grade={row.gradeB} isWinner={row.winner === "b"} />
       </div>
@@ -84,7 +84,7 @@ function LoadingState() {
         🔬 Loading data for both stations...
       </p>
       {[1, 2, 3].map((i) => (
-        <div key={i} className="grid grid-cols-2 gap-3">
+        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="shimmer h-14 rounded-lg" />
           <div className="shimmer h-14 rounded-lg" />
         </div>
@@ -218,7 +218,7 @@ export default function ComparisonPanel({
         ) : (
           <>
             {/* Station name headers */}
-            <div className="grid grid-cols-2 gap-3 text-center text-xs font-semibold">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-center text-xs font-semibold">
               <div className="rounded-lg bg-ocean-100 px-2 py-1.5 text-ocean-800 truncate">
                 {stationA.name}
               </div>

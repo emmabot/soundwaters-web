@@ -35,7 +35,7 @@ export default function MetricTabs({
   }, [metricsData]);
 
   return (
-    <div className="glass flex flex-wrap gap-1.5 rounded-xl p-1.5">
+    <div className="glass flex gap-1.5 overflow-x-auto rounded-xl p-1.5 sm:flex-wrap">
       {availableMetrics.map((key) => {
         const info = METRIC_INFO[key];
         const isActive = key === activeMetric;
@@ -45,7 +45,7 @@ export default function MetricTabs({
           <button
             key={key}
             onClick={() => onSelect(key)}
-            className="relative rounded-full px-4 py-2 text-sm font-medium transition-colors"
+            className="relative flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors"
           >
             {isActive && (
               <motion.div
