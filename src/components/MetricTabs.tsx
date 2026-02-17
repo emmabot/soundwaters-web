@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { METRIC_INFO, type MetricKey } from "@/lib/thresholds";
 
 export default function MetricTabs({
@@ -12,7 +13,7 @@ export default function MetricTabs({
   onSelect: (key: MetricKey) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="glass flex flex-wrap gap-1.5 rounded-xl p-1.5">
       {availableMetrics.map((key) => {
         const info = METRIC_INFO[key];
         const isActive = key === activeMetric;
@@ -21,14 +22,19 @@ export default function MetricTabs({
           <button
             key={key}
             onClick={() => onSelect(key)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-              isActive
-                ? "bg-ocean-600 text-white shadow-md"
-                : "bg-ocean-100 text-ocean-700 hover:bg-ocean-200"
-            }`}
+            className="relative rounded-full px-4 py-2 text-sm font-medium transition-colors"
           >
-            <span className="mr-1">{info.emoji}</span>
-            {info.name}
+            {isActive && (
+              <motion.div
+                layoutId="activeTab"
+                className="absolute inset-0 rounded-full bg-ocean-600 shadow-md"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className={`relative z-10 ${isActive ? "text-white" : "text-ocean-700 hover:text-ocean-900"}`}>
+              <span className="mr-1">{info.emoji}</span>
+              {info.name}
+            </span>
           </button>
         );
       })}

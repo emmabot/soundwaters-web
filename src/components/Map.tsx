@@ -337,7 +337,7 @@ export default function StationMap({
       defaultCenter={LIS_CENTER}
       defaultZoom={DEFAULT_ZOOM}
       gestureHandling="greedy"
-      mapId="soundwaters-map"
+      mapId="ac323095a9ef6b841ee36dfb"
       className="h-full w-full"
       onClick={() => {
         setSelectedStation(null);
