@@ -16,12 +16,17 @@ export type MetricData = {
  */
 const CHARACTERISTIC_MAP: [RegExp, MetricKey][] = [
   [/^dissolved oxygen/i, "do"],
+  [/^oxygen$/i, "do"],
   [/^do$/i, "do"],
   [/^ph$/i, "ph"],
   [/^temperature,?\s*water/i, "temperature"],
   [/^nitrate/i, "nitrogen"],
+  [/^nitrite/i, "nitrogen"],
   [/^nitrogen/i, "nitrogen"],
   [/^inorganic nitrogen/i, "nitrogen"],
+  [/^kjeldahl nitrogen/i, "nitrogen"],
+  [/^organic nitrogen/i, "nitrogen"],
+  [/^ammonia/i, "nitrogen"],
   [/^enterococc/i, "bacteria"],
   [/^escherichia coli/i, "bacteria"],
   [/^e\.\s*coli/i, "bacteria"],
