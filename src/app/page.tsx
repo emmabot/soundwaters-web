@@ -6,68 +6,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import StationMap from "@/components/Map";
 import StationDataPanel from "@/components/StationDataPanel";
 import FilterPanel, { type Filters } from "@/components/FilterPanel";
+import WelcomeHero from "@/components/WelcomeHero";
+import ComparisonPanel from "@/components/ComparisonPanel";
 import type { Station } from "@/lib/stations";
 import { fetchStations, getStationsWithCoordinates } from "@/lib/stations";
 
-function AnimatedCounter({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="text-center">
-      <div className="text-2xl font-bold text-white sm:text-3xl">{value}</div>
-      <div className="text-xs text-ocean-200 sm:text-sm">{label}</div>
-    </div>
-  );
-}
 
-function HeroOverlay({ stationCount }: { stationCount: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-center pt-24 px-6 sm:pt-28 sm:px-10"
-    >
-      <div className="pointer-events-auto glass-dark w-full max-w-lg rounded-2xl px-5 py-6 text-center sm:px-6 sm:py-7">
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl"
-        >
-          Explore Water Quality in
-          <br />
-          <span className="bg-gradient-to-r from-ocean-300 via-teal-400 to-ocean-400 bg-clip-text text-transparent">
-            Long Island Sound
-          </span>
-        </motion.h2>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="mt-6 flex items-center justify-center gap-6 sm:gap-10"
-        >
-          <AnimatedCounter value={String(stationCount)} label="Monitoring Stations" />
-          <div className="h-8 w-px bg-white/20" />
-          <AnimatedCounter value="5" label="Water Quality Metrics" />
-          <div className="h-8 w-px bg-white/20" />
-          <AnimatedCounter value="EPA" label="Real Data" />
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-          className="mt-6 text-sm text-ocean-200 sm:text-base"
-        >
-          <span className="inline-block pulse-glow rounded-full bg-white/10 px-5 py-2 font-medium text-white">
-            Click a station to begin exploring →
-          </span>
-        </motion.p>
-      </div>
-    </motion.div>
-  );
-}
 
 function AboutModal({ onClose }: { onClose: () => void }) {
   return (
@@ -168,6 +112,14 @@ export default function Home() {
   /* About modal */
   const [showAbout, setShowAbout] = useState(false);
 
+  /* Welcome hero */
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  /* Comparison mode */
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [stationA, setStationA] = useState<Station | null>(null);
+  const [stationB, setStationB] = useState<Station | null>(null);
+
   /* Load stations on mount */
   useEffect(() => {
     let cancelled = false;
@@ -191,11 +143,32 @@ export default function Home() {
   );
 
   const handleStationSelect = useCallback((station: Station) => {
-    setSelectedStation(station);
-  }, []);
+    if (comparisonMode && stationA) {
+      // In comparison mode with station A already selected — this is station B
+      setStationB(station);
+      setComparisonMode(false);
+    } else {
+      setSelectedStation(station);
+    }
+  }, [comparisonMode, stationA]);
 
   const handleDeselect = useCallback(() => {
     setSelectedStation(null);
+  }, []);
+
+  const handleCompare = useCallback(() => {
+    if (selectedStation) {
+      setStationA(selectedStation);
+      setStationB(null);
+      setComparisonMode(true);
+      setSelectedStation(null); // Close the single panel
+    }
+  }, [selectedStation]);
+
+  const handleExitComparison = useCallback(() => {
+    setStationA(null);
+    setStationB(null);
+    setComparisonMode(false);
   }, []);
 
   return (
@@ -264,9 +237,34 @@ export default function Home() {
         onToggle={() => setIsFilterOpen((o) => !o)}
       />
 
-      {/* Hero Overlay — shown when no station selected */}
+      {/* Welcome — shown when no station selected and welcome not dismissed */}
       <AnimatePresence>
-        {!selectedStation && <HeroOverlay stationCount={allStations.length} />}
+        {!selectedStation && !stationA && showWelcome && (
+          <WelcomeHero stationCount={allStations.length} onDismiss={() => setShowWelcome(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Comparison mode banner */}
+      <AnimatePresence>
+        {comparisonMode && stationA && !stationB && (
+          <motion.div
+            key="comparison-banner"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-center px-6 pt-24 sm:pt-28"
+          >
+            <div className="pointer-events-auto glass-dark rounded-xl px-5 py-3 text-center text-sm text-white">
+              📊 Click another station to compare with <span className="font-semibold">{stationA.name}</span>...
+              <button
+                onClick={handleExitComparison}
+                className="ml-3 rounded-lg bg-white/10 px-2 py-1 text-xs hover:bg-white/20 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Sliding Data Panel (right side) */}
@@ -283,7 +281,24 @@ export default function Home() {
             <StationDataPanel
               station={selectedStation}
               onClose={handleDeselect}
+              onCompare={handleCompare}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Comparison Panel */}
+      <AnimatePresence>
+        {stationA && stationB && (
+          <motion.div
+            key="comparison-panel"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="absolute right-0 top-0 z-20 h-full w-full sm:w-[520px]"
+          >
+            <ComparisonPanel stationA={stationA} stationB={stationB} onClose={handleExitComparison} />
           </motion.div>
         )}
       </AnimatePresence>

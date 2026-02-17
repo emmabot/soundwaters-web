@@ -51,9 +51,11 @@ function LoadingSkeleton() {
 export default function StationDataPanel({
   station,
   onClose,
+  onCompare,
 }: {
   station: Station;
   onClose: () => void;
+  onCompare?: () => void;
 }) {
   const [state, setState] = useState<FetchState>({ status: "loading" });
   const [activeMetric, setActiveMetric] = useState<MetricKey | null>(null);
@@ -113,6 +115,14 @@ export default function StationDataPanel({
           <h3 className="truncate text-lg font-bold text-white">{station.name}</h3>
           <p className="truncate text-xs text-ocean-200">{station.type} · {station.orgName}</p>
         </div>
+        {onCompare && (
+          <button
+            onClick={onCompare}
+            className="ml-2 flex-shrink-0 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition-all hover:bg-white/20 hover:text-white"
+          >
+            📊 Compare
+          </button>
+        )}
         <button
           onClick={onClose}
           className="ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
