@@ -191,7 +191,7 @@ function Legend({ typeCounts }: { typeCounts: Record<string, number> }) {
     <div
       style={{
         margin: "0 0 24px 10px",
-        background: "rgba(255,255,255,0.7)",
+        background: "rgba(255,255,255,0.85)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         borderRadius: 12,
@@ -205,10 +205,10 @@ function Legend({ typeCounts }: { typeCounts: Record<string, number> }) {
     >
       <div
         style={{
-          fontWeight: 700,
-          fontSize: 13,
-          marginBottom: 4,
-          color: "#075985",
+          fontWeight: 600,
+          fontSize: 11,
+          marginBottom: 6,
+          color: "#0f4c6e",
         }}
       >
         Station Types
