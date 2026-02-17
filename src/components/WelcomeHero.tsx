@@ -3,15 +3,14 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import ExplorationChallenges from "./ExplorationChallenges";
+import { TYPE_COLORS, labelForType } from "./Map";
 
 const STORAGE_KEY = "soundwaters-welcomed";
 
-const STATION_TYPES = [
-  { label: "River/Stream", color: "#3B82F6" },
-  { label: "Estuary", color: "#14B8A6" },
-  { label: "Beach", color: "#F97316" },
-  { label: "Lake/Reservoir", color: "#A855F7" },
-];
+const STATION_TYPES = Object.entries(TYPE_COLORS).map(([raw, color]) => ({
+  label: labelForType(raw),
+  color,
+}));
 
 const STEPS = [
   { icon: "🔍", text: "Search or click a station on the map" },

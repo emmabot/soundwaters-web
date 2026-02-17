@@ -54,13 +54,6 @@ export function parseStationsCsv(csvText: string): Station[] {
 }
 
 /**
- * Return all stations from parsed CSV data.
- */
-export function getAllStations(stations: Station[]): Station[] {
-  return stations;
-}
-
-/**
  * Return only stations with valid (non-zero, parseable) latitude and longitude.
  */
 export function getStationsWithCoordinates(stations: Station[]): Station[] {

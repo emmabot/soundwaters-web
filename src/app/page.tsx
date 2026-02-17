@@ -12,7 +12,7 @@ import RankingsPanel from "@/components/RankingsPanel";
 import GlossaryPanel from "@/components/GlossaryButton";
 import SearchHint from "@/components/SearchHint";
 import type { Station } from "@/lib/stations";
-import { fetchStations, getStationsWithCoordinates } from "@/lib/stations";
+import { fetchStations, getStationsWithCoordinates, formatStationName } from "@/lib/stations";
 
 
 
@@ -92,8 +92,11 @@ function AboutModal({ onClose }: { onClose: () => void }) {
 
 function applyFilters(stations: Station[], filters: Filters): Station[] {
   return stations.filter((s) => {
-    if (filters.search && !s.name.toLowerCase().includes(filters.search.toLowerCase())) {
-      return false;
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      const raw = s.name.toLowerCase();
+      const formatted = formatStationName(s.name).toLowerCase();
+      if (!raw.includes(q) && !formatted.includes(q)) return false;
     }
     if (filters.types.length > 0 && !filters.types.includes(s.type)) {
       return false;

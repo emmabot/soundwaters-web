@@ -23,9 +23,6 @@ export default function GlossaryTooltip({
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  // If no glossary entry found, just render children as-is
-  if (!entry) return <>{children ?? term}</>;
-
   const reposition = useCallback(() => {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
@@ -33,7 +30,6 @@ export default function GlossaryTooltip({
     setAbove(rect.top > 120);
   }, []);
 
-  /* eslint-disable react-hooks/rules-of-hooks */
   // Close on outside click (for mobile tap-to-open)
   useEffect(() => {
     if (!show) return;
@@ -54,7 +50,9 @@ export default function GlossaryTooltip({
       document.removeEventListener("touchstart", handler);
     };
   }, [show]);
-  /* eslint-enable react-hooks/rules-of-hooks */
+
+  // If no glossary entry found, just render children as-is
+  if (!entry) return <>{children ?? term}</>;
 
   return (
     <span className="relative inline">

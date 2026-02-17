@@ -16,6 +16,9 @@ import {
   ReferenceDot,
   Brush,
 } from "recharts";
+import type { Payload, ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
+
+type ChartTooltipPayloadItem = Payload<ValueType, NameType>;
 import { motion, AnimatePresence } from "framer-motion";
 import { RANGE_BANDS, METRIC_INFO, getGrade, type MetricKey } from "@/lib/thresholds";
 import type { DataPoint } from "@/lib/water-quality-data";
@@ -28,7 +31,15 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+type WeatherTooltipProps = {
+  active?: boolean;
+  payload?: ReadonlyArray<ChartTooltipPayloadItem>;
+  label?: string;
+  unit: string;
+  metricKey: MetricKey;
+  showWeather: boolean;
+};
+
 function WeatherTooltip({
   active,
   payload,
@@ -36,20 +47,15 @@ function WeatherTooltip({
   unit,
   metricKey,
   showWeather,
-}: {
-  active?: boolean;
-  payload?: any[];
-  label?: string;
-  unit: string;
-  metricKey: MetricKey;
-  showWeather: boolean;
-}) {
+}: WeatherTooltipProps) {
   if (!active || !payload?.length) return null;
-  const valuePl = payload.find((p: any) => p.dataKey === "value");
-  const airTempPl = payload.find((p: any) => p.dataKey === "airTemp");
-  const precipPl = payload.find((p: any) => p.dataKey === "precip");
-  const value = valuePl?.value;
+  const valuePl = payload.find((p: ChartTooltipPayloadItem) => p.dataKey === "value");
+  const airTempPl = payload.find((p: ChartTooltipPayloadItem) => p.dataKey === "airTemp");
+  const precipPl = payload.find((p: ChartTooltipPayloadItem) => p.dataKey === "precip");
+  const value = valuePl?.value as number | undefined;
   const grade = value != null ? getGrade(metricKey, value) : null;
+  const airTemp = airTempPl?.value as number | undefined;
+  const precip = precipPl?.value as number | undefined;
 
   return (
     <div className="glass rounded-lg px-3 py-2 shadow-lg max-w-[220px]">
@@ -75,16 +81,16 @@ function WeatherTooltip({
           )}
         </>
       )}
-      {showWeather && (airTempPl?.value != null || precipPl?.value != null) && (
+      {showWeather && (airTemp != null || precip != null) && (
         <div className="mt-1.5 border-t border-ocean-200 pt-1.5">
-          {airTempPl?.value != null && (
+          {airTemp != null && (
             <p className="text-xs text-amber-700">
-              🌡️ Air: {airTempPl.value.toFixed(1)}°C
+              🌡️ Air: {airTemp.toFixed(1)}°C
             </p>
           )}
-          {precipPl?.value != null && precipPl.value > 0 && (
+          {precip != null && precip > 0 && (
             <p className="text-xs text-blue-600">
-              🌧️ Rain: {precipPl.value.toFixed(1)} mm
+              🌧️ Rain: {precip.toFixed(1)} mm
             </p>
           )}
         </div>
@@ -92,7 +98,6 @@ function WeatherTooltip({
     </div>
   );
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export default function TrendChart({
   metricKey,
