@@ -46,7 +46,15 @@ export default function WelcomeHero({
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-center px-6 pt-24 sm:px-10 sm:pt-28"
     >
-      <div className="pointer-events-auto glass-dark w-full max-w-xl rounded-2xl px-5 py-6 sm:px-6 sm:py-7">
+      <div className="pointer-events-auto glass-dark relative w-full max-w-xl rounded-2xl px-5 py-6 sm:px-6 sm:py-7">
+        <button
+          onClick={handleDismiss}
+          className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+          aria-label="Close welcome"
+        >
+          ✕
+        </button>
+
         {/* Title */}
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
