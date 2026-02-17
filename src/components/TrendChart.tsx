@@ -12,9 +12,11 @@ import {
   Tooltip,
   ReferenceArea,
   ReferenceLine,
+  ReferenceDot,
+  Brush,
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
-import { RANGE_BANDS, METRIC_INFO, type MetricKey } from "@/lib/thresholds";
+import { RANGE_BANDS, METRIC_INFO, getGrade, type MetricKey } from "@/lib/thresholds";
 import type { DataPoint } from "@/lib/water-quality-data";
 import { computeTrend } from "@/lib/trend-analysis";
 
@@ -29,13 +31,17 @@ function CustomTooltip({
   payload,
   label,
   unit,
+  metricKey,
 }: {
   active?: boolean;
   payload?: { value: number }[];
   label?: string;
   unit: string;
+  metricKey: MetricKey;
 }) {
   if (!active || !payload?.length) return null;
+  const value = payload[0].value;
+  const grade = getGrade(metricKey, value);
   return (
     <div className="glass rounded-lg px-3 py-2 shadow-lg">
       <p className="text-xs font-semibold text-ocean-800">
@@ -46,7 +52,10 @@ function CustomTooltip({
         }) : ""}
       </p>
       <p className="mt-1 text-sm font-bold text-ocean-700">
-        {payload[0].value}{unit ? ` ${unit}` : ""}
+        {value}{unit ? ` ${unit}` : ""}
+      </p>
+      <p className="mt-0.5 text-xs text-ocean-600">
+        Grade: {grade.grade} — {grade.label} {grade.emoji}
       </p>
     </div>
   );
@@ -103,6 +112,40 @@ export default function TrendChart({
     }));
   }, [points, showTrend, trendLineData]);
 
+  // Seasonal summer highlights (Jun-Aug)
+  const summerBands = useMemo(() => {
+    const bands: { x1: string; x2: string }[] = [];
+    let start: string | null = null;
+    let prev: string | null = null;
+    for (const p of points) {
+      const month = new Date(p.date).getMonth() + 1;
+      if (month >= 6 && month <= 8) {
+        if (!start) start = p.date;
+        prev = p.date;
+      } else {
+        if (start && prev) bands.push({ x1: start, x2: prev });
+        start = null;
+        prev = null;
+      }
+    }
+    if (start && prev) bands.push({ x1: start, x2: prev });
+    return bands;
+  }, [points]);
+
+  // Min/max outlier annotations
+  const { minPoint, maxPoint } = useMemo(() => {
+    if (points.length === 0) return { minPoint: null, maxPoint: null };
+    let min = points[0];
+    let max = points[0];
+    for (const p of points) {
+      if (p.value < min.value) min = p;
+      if (p.value > max.value) max = p;
+    }
+    // Only show annotations if there are at least 3 points and min !== max
+    if (points.length < 3 || min.value === max.value) return { minPoint: null, maxPoint: null };
+    return { minPoint: min, maxPoint: max };
+  }, [points]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -145,6 +188,18 @@ export default function TrendChart({
                 ifOverflow="hidden"
               />
             ))}
+            {/* Summer seasonal highlights */}
+            {summerBands.map((sb, i) => (
+              <ReferenceArea
+                key={`summer-${i}`}
+                x1={sb.x1}
+                x2={sb.x2}
+                fill="rgba(251, 191, 36, 0.08)"
+                fillOpacity={1}
+                ifOverflow="hidden"
+                label={i === 0 ? { value: "☀️", position: "insideTopLeft", fontSize: 12 } : undefined}
+              />
+            ))}
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
@@ -164,7 +219,7 @@ export default function TrendChart({
                 style: { fontSize: 11, fill: "#94a3b8" },
               }}
             />
-            <Tooltip content={<CustomTooltip unit={info.unit} />} />
+            <Tooltip content={<CustomTooltip unit={info.unit} metricKey={metricKey} />} />
             <Area
               type="monotone"
               dataKey="value"
@@ -204,6 +259,37 @@ export default function TrendChart({
                 />
               </>
             )}
+            {/* Min/max outlier annotations */}
+            {maxPoint && (
+              <ReferenceDot
+                x={maxPoint.date}
+                y={maxPoint.value}
+                r={6}
+                fill="#ef4444"
+                stroke="#fff"
+                strokeWidth={2}
+                label={{ value: "📍 Highest", position: "top", fontSize: 10 }}
+              />
+            )}
+            {minPoint && (
+              <ReferenceDot
+                x={minPoint.date}
+                y={minPoint.value}
+                r={6}
+                fill="#3b82f6"
+                stroke="#fff"
+                strokeWidth={2}
+                label={{ value: "📍 Lowest", position: "bottom", fontSize: 10 }}
+              />
+            )}
+            {/* Brushable date range selector */}
+            <Brush
+              dataKey="date"
+              height={30}
+              stroke="#0284c7"
+              fill="#f0f9ff"
+              tickFormatter={formatDate}
+            />
           </ComposedChart>
         </ResponsiveContainer>
       </motion.div>

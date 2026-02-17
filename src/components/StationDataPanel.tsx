@@ -197,6 +197,7 @@ export default function StationDataPanel({
                 availableMetrics={state.metrics.map((m) => m.key)}
                 activeMetric={activeMetric}
                 onSelect={setActiveMetric}
+                metricsData={state.metrics}
               />
               <TrendChart metricKey={activeData.key} points={activeData.points} />
               <MetricExplanation metricKey={activeMetric} />
