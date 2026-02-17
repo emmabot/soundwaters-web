@@ -22,16 +22,18 @@ const STEPS = [
 export default function WelcomeHero({
   stationCount,
   onDismiss,
+  forceShow,
 }: {
   stationCount: number;
   onDismiss: () => void;
+  forceShow?: boolean;
 }) {
-  // Auto-dismiss if already welcomed
+  // Auto-dismiss if already welcomed (skip when forceShow is true)
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY) === "true") {
+    if (!forceShow && localStorage.getItem(STORAGE_KEY) === "true") {
       onDismiss();
     }
-  }, [onDismiss]);
+  }, [onDismiss, forceShow]);
 
   const handleDismiss = () => {
     localStorage.setItem(STORAGE_KEY, "true");
