@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { Station } from "@/lib/stations";
 import type { WaterQualityResult } from "@/lib/wqx-api";
 import { fetchWaterQualityResults } from "@/lib/wqx-api";
@@ -181,7 +181,19 @@ export default function ComparisonPanel({
         : null;
 
   return (
-    <div className="glass-panel flex h-full flex-col overflow-hidden rounded-l-2xl shadow-2xl">
+    <motion.div
+      className="glass-panel flex h-full max-h-[85vh] sm:max-h-full flex-col overflow-hidden rounded-l-2xl shadow-2xl"
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.5 }}
+      onDragEnd={(_, info) => {
+        if (info.offset.x > 100) onClose();
+      }}
+    >
+      {/* Drag handle — mobile only */}
+      <div className="flex justify-center py-2 sm:hidden">
+        <div className="h-1 w-10 rounded-full bg-ocean-300" />
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4">
         <div className="min-w-0 flex-1">
@@ -192,7 +204,7 @@ export default function ComparisonPanel({
         </div>
         <button
           onClick={onClose}
-          className="ml-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+          className="ml-3 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
           aria-label="Exit comparison"
         >
           ✕
@@ -237,7 +249,7 @@ export default function ComparisonPanel({
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

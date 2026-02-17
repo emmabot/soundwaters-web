@@ -267,7 +267,7 @@ export default function TrendChart({
               <button
                 key={period}
                 onClick={() => setTimePeriod(period)}
-                className={`rounded-md px-2 py-0.5 text-[10px] font-medium transition-all ${
+                className={`rounded-md px-3 py-2 text-xs font-medium transition-all ${
                   timePeriod === period
                     ? 'bg-ocean-600 text-white'
                     : 'bg-ocean-50/80 text-ocean-600 hover:bg-ocean-100'

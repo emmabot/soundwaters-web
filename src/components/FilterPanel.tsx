@@ -76,7 +76,7 @@ export default function FilterPanel({
       {/* Toggle button */}
       <button
         onClick={onToggle}
-        className="glass pointer-events-auto fixed left-4 top-20 z-30 flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl sm:left-5 sm:top-[76px]"
+        className="glass pointer-events-auto fixed left-4 top-20 z-30 flex h-12 w-12 items-center justify-center rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl sm:left-5 sm:top-[76px]"
         aria-label={isOpen ? "Close filter panel" : "Open filter panel"}
       >
         <span className="text-lg">{isOpen ? "✕" : "🔍"}</span>
@@ -103,7 +103,7 @@ export default function FilterPanel({
                 </div>
                 <button
                   onClick={onToggle}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
                   aria-label="Close filter panel"
                 >
                   ✕

@@ -188,7 +188,7 @@ export default function StationDataPanel({
               setShowCopied(true);
               setTimeout(() => setShowCopied(false), 2000);
             }}
-            className="ml-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+            className="ml-2 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
             aria-label="Share station link"
           >
             🔗
@@ -196,7 +196,7 @@ export default function StationDataPanel({
         )}
         <button
           onClick={onClose}
-          className="ml-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+          className="ml-2 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
           aria-label="Close panel"
         >
           ✕

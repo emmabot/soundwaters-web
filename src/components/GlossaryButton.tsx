@@ -18,16 +18,35 @@ function GlossaryPanelInner({ onClose }: { onClose: () => void }) {
     : sorted;
 
   return (
-    <motion.div
-      key="glossary-panel"
-      initial={{ x: "-100%" }}
-      animate={{ x: 0 }}
-      exit={{ x: "-100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="pointer-events-auto absolute left-0 top-0 z-40 flex h-full w-full flex-col overflow-hidden rounded-r-2xl shadow-2xl sm:w-[360px]"
-    >
-      <div className="glass-panel flex h-full flex-col">
-        {/* Header */}
+    <>
+      {/* Backdrop — mobile only */}
+      <motion.div
+        className="absolute inset-0 bg-black/20 sm:hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      />
+      <motion.div
+        key="glossary-panel"
+        initial={{ x: "-100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "-100%" }}
+        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+        className="pointer-events-auto absolute left-0 top-0 z-40 flex h-full max-h-[85vh] sm:max-h-full w-full flex-col overflow-hidden rounded-r-2xl shadow-2xl sm:w-[360px]"
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={{ left: 0.5, right: 0 }}
+        onDragEnd={(_, info) => {
+          if (info.offset.x < -100) onClose();
+        }}
+      >
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center py-2 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-ocean-300" />
+        </div>
+        <div className="glass-panel flex h-full flex-col">
+          {/* Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-ocean-800 via-ocean-700 to-teal-600 px-5 py-4">
           <div>
             <h2 className="text-lg font-bold text-white">📖 Glossary</h2>
@@ -35,7 +54,7 @@ function GlossaryPanelInner({ onClose }: { onClose: () => void }) {
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-all hover:bg-white/20 hover:text-white hover:scale-110"
             aria-label="Close glossary"
           >
             ✕
@@ -101,6 +120,7 @@ function GlossaryPanelInner({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
 
